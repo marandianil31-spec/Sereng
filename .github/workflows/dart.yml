@@ -3,9 +3,8 @@ name: Flutter CI
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
- permissions:
+
+permissions:
   contents: write
 
 jobs:
