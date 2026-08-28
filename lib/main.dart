@@ -493,11 +493,18 @@ class SongTile extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.play_circle_outline),
-          ),
-        ],
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerScreen(
+          songTitle: title,
+          artistName: artist,
+        ),
       ),
     );
-  }
-}
+  },
+  icon: const Icon(Icons.play_circle_outline),
+),
+          }
+          }
