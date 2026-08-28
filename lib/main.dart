@@ -506,5 +506,8 @@ class SongTile extends StatelessWidget {
   },
   icon: const Icon(Icons.play_circle_outline),
 ),
-          }
-          }
+       ],
+      ),
+    );
+  }
+}
