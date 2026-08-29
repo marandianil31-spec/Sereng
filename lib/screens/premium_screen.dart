@@ -348,7 +348,7 @@ class PremiumFeature extends StatelessWidget {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Colors.white45,
+                    color: Colors.white54,
                     fontSize: 11,
                   ),
                 ),
