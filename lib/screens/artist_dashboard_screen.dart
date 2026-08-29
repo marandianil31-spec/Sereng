@@ -303,7 +303,7 @@ class ArtistDashboardScreen extends StatelessWidget {
                       'Song statistics and earnings will be '
                       'connected to the SERENG backend later.',
                       style: TextStyle(
-                        color: Colors.white45,
+                        color: Colors.white54,
                         fontSize: 11,
                         height: 1.4,
                       ),
