@@ -352,7 +352,7 @@ class HomeMusicCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: Colors.white45,
+              color: Colors.white54,
               fontSize: 11,
             ),
           ),
