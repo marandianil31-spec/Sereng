@@ -286,7 +286,7 @@ class EmptyNotifications extends StatelessWidget {
               'You are all caught up.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white45,
+                color: Colors.white54,
                 fontSize: 13,
               ),
             ),
