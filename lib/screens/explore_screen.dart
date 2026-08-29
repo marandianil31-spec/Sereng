@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'music_player_screen.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
@@ -7,7 +8,6 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
@@ -25,7 +25,6 @@ class ExploreScreen extends StatelessWidget {
           ),
         ],
       ),
-
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
         children: [
@@ -36,9 +35,7 @@ class ExploreScreen extends StatelessWidget {
               fontSize: 15,
             ),
           ),
-
           const SizedBox(height: 5),
-
           const Text(
             'Find your next favorite',
             style: TextStyle(
@@ -46,7 +43,6 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 22),
 
           // Search box
@@ -83,7 +79,6 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 14),
 
           SizedBox(
@@ -120,7 +115,6 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 14),
 
           const ExploreSongTile(
@@ -128,19 +122,16 @@ class ExploreScreen extends StatelessWidget {
             artist: 'Rahul Murmu',
             number: '01',
           ),
-
           const ExploreSongTile(
             title: 'Baha Bonga',
             artist: 'Pankaj Murmu',
             number: '02',
           ),
-
           const ExploreSongTile(
             title: 'Dular Gate',
             artist: 'Stephan Tudu',
             number: '03',
           ),
-
           const ExploreSongTile(
             title: 'Amge Mon',
             artist: 'Stephan Tudu',
@@ -156,7 +147,6 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 16),
 
           const Row(
@@ -305,8 +295,19 @@ class ExploreSongTile extends StatelessWidget {
             ),
           ),
 
+          // Play button
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MusicPlayerScreen(
+                    songTitle: title,
+                    artistName: artist,
+                  ),
+                ),
+              );
+            },
             icon: const Icon(
               Icons.play_circle_outline,
               size: 30,
