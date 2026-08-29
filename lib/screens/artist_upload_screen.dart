@@ -164,7 +164,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: DropdownButtonFormField<String>(
-                initialValue: selectedGenre,
+              initialValue: selectedGenre,
                 dropdownColor: const Color(0xFF18181F),
                 decoration: const InputDecoration(
                   prefixIcon: Icon(
