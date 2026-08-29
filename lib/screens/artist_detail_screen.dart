@@ -342,7 +342,7 @@ class ArtistStat extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white45,
+            color: Colors.white54,
             fontSize: 10,
           ),
         ),
@@ -423,7 +423,7 @@ class ArtistSongTile extends StatelessWidget {
                 Text(
                   plays,
                   style: const TextStyle(
-                    color: Colors.white45,
+                    color: Colors.white54,
                     fontSize: 11,
                   ),
                 ),
@@ -499,7 +499,7 @@ class AlbumCard extends StatelessWidget {
           Text(
             year,
             style: const TextStyle(
-              color: Colors.white45,
+              color: Colors.white54,
               fontSize: 11,
             ),
           ),
