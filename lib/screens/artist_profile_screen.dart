@@ -157,7 +157,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                             Text(
                               'Followers',
                               style: TextStyle(
-                                color: Colors.white45,
+                                color: Colors.white54,
                                 fontSize: 11,
                               ),
                             ),
@@ -177,7 +177,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                             Text(
                               'Songs',
                               style: TextStyle(
-                                color: Colors.white45,
+                                color: Colors.white54,
                                 fontSize: 11,
                               ),
                             ),
@@ -197,7 +197,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                             Text(
                               'Albums',
                               style: TextStyle(
-                                color: Colors.white45,
+                                color: Colors.white54,
                                 fontSize: 11,
                               ),
                             ),
