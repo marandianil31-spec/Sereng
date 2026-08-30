@@ -100,18 +100,19 @@ class _QueueScreenState extends State<QueueScreen> {
                 ),
                 Expanded(
                   child: ReorderableListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                    ),
                     itemCount: queue.length,
-                    onReorderItem:
-                      setState(() {
-                        if (newIndex > oldIndex) {
-                          newIndex -= 1;
-                        }
 
+                    // Flutter ke naye version ke liye
+                    onReorderItem: (oldIndex, newIndex) {
+                      setState(() {
                         final item = queue.removeAt(oldIndex);
                         queue.insert(newIndex, item);
                       });
                     },
+
                     itemBuilder: (context, index) {
                       final song = queue[index];
 
@@ -153,8 +154,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                   Text(
                                     song['title']!,
                                     maxLines: 1,
-                                    overflow:
-                                        TextOverflow.ellipsis,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -163,8 +163,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                   Text(
                                     song['artist']!,
                                     maxLines: 1,
-                                    overflow:
-                                        TextOverflow.ellipsis,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       color: Colors.white54,
                                       fontSize: 12,
