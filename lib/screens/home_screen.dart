@@ -299,6 +299,7 @@ class HomeSectionTitle extends StatelessWidget {
             ),
           ),
         ),
+      ]
     );
   }
 }
