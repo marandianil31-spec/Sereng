@@ -6,12 +6,8 @@ class AudioPlayerService {
   AudioPlayer get player => _player;
 
   Future<void> play(String url) async {
-    try {
-      await _player.setUrl(url);
-      await _player.play();
-    } catch (e) {
-      print('Audio playback error: $e');
-    }
+    await _player.setUrl(url);
+    await _player.play();
   }
 
   Future<void> pause() async {
