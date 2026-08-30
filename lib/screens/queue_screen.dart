@@ -102,7 +102,7 @@ class _QueueScreenState extends State<QueueScreen> {
                   child: ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     itemCount: queue.length,
-                    onReorder: (oldIndex, newIndex) {
+                    onReorderItem:
                       setState(() {
                         if (newIndex > oldIndex) {
                           newIndex -= 1;
