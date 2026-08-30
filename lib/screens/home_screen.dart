@@ -282,21 +282,23 @@ class HomeSectionTitle extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        TextButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const RecentlyPlayedScreen(),
-      ),
-    );
-  },
-  child: const Text(
-    'See all',
+                TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const RecentlyPlayedScreen(),
+              ),
+            );
+          },
+          child: const Text(
+            'See all',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 12,
             ),
           ),
         ),
-      ],
     );
   }
 }
