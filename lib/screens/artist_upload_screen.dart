@@ -1,3 +1,9 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class ArtistUploadScreen extends StatefulWidget {
@@ -13,7 +19,17 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
   final albumController = TextEditingController();
   final descriptionController = TextEditingController();
 
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final DatabaseReference _database =
+      FirebaseDatabase.instance.ref();
+
   String selectedGenre = 'Santhali';
+
+  PlatformFile? selectedAudio;
+  PlatformFile? selectedCover;
+
+  bool isUploading = false;
+  double uploadProgress = 0;
 
   final List<String> genres = [
     'Santhali',
@@ -32,22 +48,257 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
     super.dispose();
   }
 
-  void submitSong() {
-    if (artistController.text.trim().isEmpty ||
-        songController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter artist name and song title.'),
-        ),
+  Future<void> pickAudio() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'mp3',
+          'wav',
+          'm4a',
+          'aac',
+          'ogg',
+        ],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final file = result.files.first;
+
+      if (file.path == null) {
+        _showMessage('Audio file access nahi ho saka.');
+        return;
+      }
+
+      setState(() {
+        selectedAudio = file;
+      });
+    } catch (e) {
+      _showMessage('Audio select nahi ho saka.');
+    }
+  }
+
+  Future<void> pickCover() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'jpg',
+          'jpeg',
+          'png',
+          'webp',
+        ],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final file = result.files.first;
+
+      if (file.path == null) {
+        _showMessage('Cover image access nahi ho saka.');
+        return;
+      }
+
+      setState(() {
+        selectedCover = file;
+      });
+    } catch (e) {
+      _showMessage('Cover image select nahi ho saka.');
+    }
+  }
+
+  Future<String> _uploadFile({
+    required File file,
+    required String path,
+    required void Function(double progress) onProgress,
+  }) async {
+    final reference = _storage.ref().child(path);
+
+    final uploadTask = reference.putFile(file);
+
+    uploadTask.snapshotEvents.listen((snapshot) {
+      if (snapshot.totalBytes > 0) {
+        final progress =
+            snapshot.bytesTransferred / snapshot.totalBytes;
+
+        onProgress(progress);
+      }
+    });
+
+    final snapshot = await uploadTask;
+
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  Future<void> submitSong() async {
+    final artistName = artistController.text.trim();
+    final songTitle = songController.text.trim();
+    final albumName = albumController.text.trim();
+    final description = descriptionController.text.trim();
+
+    if (artistName.isEmpty) {
+      _showMessage('Artist name enter karein.');
+      return;
+    }
+
+    if (songTitle.isEmpty) {
+      _showMessage('Song title enter karein.');
+      return;
+    }
+
+    if (selectedAudio == null) {
+      _showMessage('Pehle audio file select karein.');
+      return;
+    }
+
+    if (selectedCover == null) {
+      _showMessage('Pehle cover image select karein.');
+      return;
+    }
+
+    final audioPath = selectedAudio!.path;
+    final coverPath = selectedCover!.path;
+
+    if (audioPath == null || coverPath == null) {
+      _showMessage('Selected file access nahi ho saka.');
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _showMessage(
+        'Upload karne ke liye pehle login karein.',
       );
       return;
     }
 
+    setState(() {
+      isUploading = true;
+      uploadProgress = 0;
+    });
+
+    try {
+      final songId =
+          _database.child('pending_songs').push().key;
+
+      if (songId == null) {
+        throw Exception('Song ID create nahi hua.');
+      }
+
+      final audioFile = File(audioPath);
+      final coverFile = File(coverPath);
+
+      final audioUrl = await _uploadFile(
+        file: audioFile,
+        path: 'songs/$songId/audio/${selectedAudio!.name}',
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              uploadProgress = progress * 0.8;
+            });
+          }
+        },
+      );
+
+      final coverUrl = await _uploadFile(
+        file: coverFile,
+        path: 'songs/$songId/cover/${selectedCover!.name}',
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              uploadProgress = 0.8 + (progress * 0.2);
+            });
+          }
+        },
+      );
+
+      await _database
+          .child('pending_songs')
+          .child(songId)
+          .set({
+        'songId': songId,
+        'artistId': user.uid,
+        'artistName': artistName,
+        'songTitle': songTitle,
+        'albumName': albumName,
+        'genre': selectedGenre,
+        'description': description,
+        'audioUrl': audioUrl,
+        'coverUrl': coverUrl,
+        'status': 'pending',
+        'createdAt': ServerValue.timestamp,
+      });
+
+      if (!mounted) return;
+
+      setState(() {
+        isUploading = false;
+        uploadProgress = 1;
+      });
+
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF18181F),
+            title: const Text(
+              'Upload Successful',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: const Text(
+              'Aapka song successfully upload ho gaya hai '
+              'aur approval ke liye bhej diya gaya hai.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (!mounted) return;
+
+      artistController.clear();
+      songController.clear();
+      albumController.clear();
+      descriptionController.clear();
+
+      setState(() {
+        selectedAudio = null;
+        selectedCover = null;
+        selectedGenre = 'Santhali';
+        uploadProgress = 0;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isUploading = false;
+      });
+
+      _showMessage(
+        'Upload failed. Firebase settings/rules check karein.',
+      );
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Song submitted for approval. Upload system will be connected later.',
-        ),
+      SnackBar(
+        content: Text(message),
       ),
     );
   }
@@ -56,12 +307,13 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: isUploading
+              ? null
+              : () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         title: const Text(
@@ -71,13 +323,11 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 35),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -164,7 +414,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: DropdownButtonFormField<String>(
-              initialValue: selectedGenre,
+                initialValue: selectedGenre,
                 dropdownColor: const Color(0xFF18181F),
                 decoration: const InputDecoration(
                   prefixIcon: Icon(
@@ -172,31 +422,27 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                     color: Colors.white54,
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                  ),
                 ),
-                items: genres.map(
-                  (genre) {
-                    return DropdownMenuItem(
-                      value: genre,
-                      child: Text(genre),
-                    );
-                  },
-                ).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedGenre = value;
-                    });
-                  }
-                },
+                items: genres.map((genre) {
+                  return DropdownMenuItem<String>(
+                    value: genre,
+                    child: Text(genre),
+                  );
+                }).toList(),
+                onChanged: isUploading
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() {
+                            selectedGenre = value;
+                          });
+                        }
+                      },
               ),
             ),
 
             const SizedBox(height: 25),
 
-            // Cover image
             const Text(
               'Cover Image',
               style: TextStyle(
@@ -208,15 +454,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
             const SizedBox(height: 12),
 
             InkWell(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Image picker will be connected later.',
-                    ),
-                  ),
-                );
-              },
+              onTap: isUploading ? null : pickCover,
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 width: double.infinity,
@@ -228,37 +466,72 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                     color: Colors.white12,
                   ),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 45,
-                      color: Colors.white54,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Add Cover Image',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                child: selectedCover == null
+                    ? const Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 45,
+                            color: Colors.white54,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Add Cover Image',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'JPG, PNG or WEBP',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            size: 45,
+                            color: Colors.greenAccent,
+                          ),
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                            ),
+                            child: Text(
+                              selectedCover!.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Tap to change',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'JPG or PNG',
-                      style: TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
 
             const SizedBox(height: 25),
 
-            // Audio file
             const Text(
               'Audio File',
               style: TextStyle(
@@ -270,15 +543,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
             const SizedBox(height: 12),
 
             InkWell(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Audio picker will be connected later.',
-                    ),
-                  ),
-                );
-              },
+              onTap: isUploading ? null : pickAudio,
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 width: double.infinity,
@@ -290,28 +555,36 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                     color: Colors.white12,
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(
-                      Icons.audio_file_outlined,
+                      selectedAudio == null
+                          ? Icons.audio_file_outlined
+                          : Icons.check_circle_rounded,
                       size: 40,
-                      color: Colors.white54,
+                      color: selectedAudio == null
+                          ? Colors.white54
+                          : Colors.greenAccent,
                     ),
-                    SizedBox(width: 15),
+                    const SizedBox(width: 15),
                     Expanded(
                       child: Column(
                         crossAxisAlignment:
                             CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Select Audio File',
-                            style: TextStyle(
+                            selectedAudio == null
+                                ? 'Select Audio File'
+                                : selectedAudio!.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            'MP3, WAV or supported audio',
+                          const SizedBox(height: 5),
+                          const Text(
+                            'MP3, WAV, M4A, AAC or OGG',
                             style: TextStyle(
                               color: Colors.white38,
                               fontSize: 12,
@@ -320,7 +593,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                         ],
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.chevron_right,
                       color: Colors.white38,
                     ),
@@ -331,7 +604,6 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Description
             const Text(
               'Description',
               style: TextStyle(
@@ -345,6 +617,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
             TextField(
               controller: descriptionController,
               maxLines: 5,
+              enabled: !isUploading,
               style: const TextStyle(
                 color: Colors.white,
               ),
@@ -364,7 +637,6 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Approval notice
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -372,7 +644,8 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Icon(
                     Icons.info_outline,
@@ -381,8 +654,8 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Your music will be reviewed before it becomes '
-                      'available on SERENG.',
+                      'Your music will be reviewed before it '
+                      'becomes available on SERENG.',
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
@@ -396,73 +669,16 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Submit
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: submitSong,
-                icon: const Icon(Icons.upload_rounded),
-                label: const Text(
-                  'Submit for Approval',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+            if (isUploading) ...[
+              Text(
+                'Uploading ${(uploadProgress * 100).round()}%',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _label(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _input({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-  }) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(
-        color: Colors.white,
-      ),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(
-          color: Colors.white38,
-        ),
-        prefixIcon: Icon(
-          icon,
-          color: Colors.white54,
-        ),
-        filled: true,
-        fillColor: const Color(0xFF18181F),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-}
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: uploadProgress,
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(10)
