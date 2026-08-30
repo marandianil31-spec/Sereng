@@ -1,3 +1,8 @@
+import 'library_screen.dart';
+import 'premium_screen.dart';
+import 'queue_screen.dart';
+import 'liked_songs_screen.dart';
+import 'recently_played_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -278,12 +283,16 @@ class HomeSectionTitle extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () {},
-          child: const Text(
-            'See all',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const RecentlyPlayedScreen(),
+      ),
+    );
+  },
+  child: const Text(
+    'See all',
             ),
           ),
         ),
