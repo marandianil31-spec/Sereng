@@ -9,9 +9,10 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final TextEditingController searchController = TextEditingController();
+  final TextEditingController _searchController =
+      TextEditingController();
 
-  final List<SearchSong> songs = const [
+  final List<SearchSong> allSongs = const [
     SearchSong(
       title: 'Dular Re',
       artist: 'Rahul Murmu',
@@ -29,49 +30,35 @@ class _SearchScreenState extends State<SearchScreen> {
       artist: 'Stephan Tudu',
     ),
     SearchSong(
-      title: 'Midnight',
-      artist: 'Sereng Artist',
+      title: 'Johar Re',
+      artist: 'Rahul Murmu',
     ),
     SearchSong(
-      title: 'Dreamscape',
-      artist: 'Luna',
+      title: 'Night Vibes',
+      artist: 'Sereng Artist',
     ),
   ];
 
-  List<SearchSong> get filteredSongs {
-    final query = searchController.text.trim().toLowerCase();
-
-    if (query.isEmpty) {
-      return songs;
-    }
-
-    return songs.where((song) {
-      return song.title.toLowerCase().contains(query) ||
-          song.artist.toLowerCase().contains(query);
-    }).toList();
-  }
+  String searchText = '';
 
   @override
   void dispose() {
-    searchController.dispose();
+    _searchController.dispose();
     super.dispose();
-  }
-
-  void openPlayer(SearchSong song) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MusicPlayerScreen(
-          songTitle: song.title,
-          artistName: song.artist,
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final results = filteredSongs;
+    final filteredSongs = allSongs.where((song) {
+      final query = searchText.toLowerCase().trim();
+
+      if (query.isEmpty) {
+        return false;
+      }
+
+      return song.title.toLowerCase().contains(query) ||
+          song.artist.toLowerCase().contains(query);
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
@@ -79,120 +66,153 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Search',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 23,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Search field
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
-            child: TextField(
-              controller: searchController,
-              autofocus: true,
-              onChanged: (_) {
-                setState(() {});
-              },
-              style: const TextStyle(
-                color: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        child: Column(
+          children: [
+            // Search field
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF18181F),
+                borderRadius: BorderRadius.circular(16),
               ),
-              decoration: InputDecoration(
-                hintText: 'Songs, artists, albums...',
-                hintStyle: const TextStyle(
-                  color: Colors.white54,
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(
+                  color: Colors.white,
                 ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: Colors.white70,
-                ),
-                suffixIcon: searchController.text.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          searchController.clear();
-                          setState(() {});
-                        },
-                        icon: const Icon(
-                          Icons.clear,
-                          color: Colors.white54,
-                        ),
-                      )
-                    : null,
-                filled: true,
-                fillColor: const Color(0xFF18181F),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                onChanged: (value) {
+                  setState(() {
+                    searchText = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Songs, artists, albums...',
+                  hintStyle: const TextStyle(
+                    color: Colors.white38,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Colors.white60,
+                  ),
+                  suffixIcon: searchText.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(
+                            Icons.clear,
+                            color: Colors.white54,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              searchText = '';
+                            });
+                          },
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 10,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Expanded(
-            child: results.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 65,
-                          color: Colors.white38,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'No music found',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Try another song or artist',
-                          style: TextStyle(
-                            color: Colors.white54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      0,
-                      16,
-                      30,
-                    ),
+            const SizedBox(height: 25),
+
+            if (searchText.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                        Icons.search_rounded,
+                        size: 70,
+                        color: Colors.white24,
+                      ),
+                      SizedBox(height: 18),
                       Text(
-                        searchController.text.trim().isEmpty
-                            ? 'Popular Music'
-                            : 'Search Results',
-                        style: const TextStyle(
-                          fontSize: 21,
+                        'Search for music',
+                        style: TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      ...results.map(
-                        (song) => SearchSongTile(
-                          song: song,
-                          onPlay: () => openPlayer(song),
+                      SizedBox(height: 7),
+                      Text(
+                        'Find songs and artists you love',
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
                         ),
                       ),
                     ],
                   ),
-          ),
-        ],
+                ),
+              )
+            else if (filteredSongs.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.music_off_rounded,
+                        size: 65,
+                        color: Colors.white24,
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'No results found',
+                        style: TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        'No music found for "$searchText"',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredSongs.length,
+                  itemBuilder: (context, index) {
+                    final song = filteredSongs[index];
+
+                    return SearchSongTile(
+                      title: song.title,
+                      artist: song.artist,
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -209,35 +229,31 @@ class SearchSong {
 }
 
 class SearchSongTile extends StatelessWidget {
-  final SearchSong song;
-  final VoidCallback onPlay;
+  final String title;
+  final String artist;
 
   const SearchSongTile({
     super.key,
-    required this.song,
-    required this.onPlay,
+    required this.title,
+    required this.artist,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 9,
-      ),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: const Color(0xFF141419),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         children: [
-          // Album image placeholder
           Container(
-            width: 52,
-            height: 52,
+            width: 55,
+            height: 55,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(12),
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF7C3AED),
@@ -248,29 +264,28 @@ class SearchSongTile extends StatelessWidget {
             child: const Icon(
               Icons.music_note_rounded,
               color: Colors.white,
-              size: 27,
+              size: 28,
             ),
           ),
 
           const SizedBox(width: 13),
 
-          // Song information
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  song.title,
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
-                  song.artist,
+                  artist,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -282,21 +297,21 @@ class SearchSongTile extends StatelessWidget {
             ),
           ),
 
-          // Play
           IconButton(
-            onPressed: onPlay,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MusicPlayerScreen(
+                    songTitle: title,
+                    artistName: artist,
+                  ),
+                ),
+              );
+            },
             icon: const Icon(
-              Icons.play_circle_outline,
-              size: 31,
-            ),
-          ),
-
-          // More options
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.more_vert,
-              color: Colors.white54,
+              Icons.play_circle_fill_rounded,
+              size: 34,
             ),
           ),
         ],
