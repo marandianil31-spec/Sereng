@@ -1,3 +1,5 @@
+
+import 'liked_songs_screen.dart';
 import 'package:flutter/material.dart';
 import 'music_player_screen.dart';
 
@@ -54,8 +56,12 @@ class LibraryScreen extends StatelessWidget {
                   icon: Icons.favorite,
                   title: 'Liked Songs',
                   subtitle: '24 songs',
-                  onTap: () {},
-                ),
+                  onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const LikedSongsScreen(),
+              ),
               ),
               const SizedBox(width: 12),
               Expanded(
