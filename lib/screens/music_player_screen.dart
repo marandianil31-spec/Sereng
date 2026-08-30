@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
   final String songTitle;
   final String artistName;
+  final String? audioUrl;
 
   const MusicPlayerScreen({
     super.key,
     this.songTitle = 'Sereng Song',
     this.artistName = 'Unknown Artist',
+    this.audioUrl,
   });
 
   @override
@@ -15,9 +18,101 @@ class MusicPlayerScreen extends StatefulWidget {
 }
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
-  bool isPlaying = false;
+  final AudioPlayer _player = AudioPlayer();
+
   bool isLiked = false;
-  double progress = 0.35;
+  bool isLoading = false;
+
+  // Temporary test MP3.
+  // Later we will replace this with the SERENG CDN URL.
+  static const String testAudioUrl =
+      'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _player.playerStateStream.listen((state) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  String get audioUrl => widget.audioUrl ?? testAudioUrl;
+
+  Future<void> _playPause() async {
+    try {
+      if (_player.playing) {
+        await _player.pause();
+        return;
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+      if (_player.processingState == ProcessingState.idle) {
+        await _player.setUrl(audioUrl);
+      }
+
+      await _player.play();
+
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Song play nahi ho saka: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _seekForward() async {
+    final position = _player.position;
+    final duration = _player.duration;
+
+    if (duration == null) return;
+
+    final newPosition = position + const Duration(seconds: 10);
+
+    await _player.seek(
+      newPosition < duration ? newPosition : duration,
+    );
+  }
+
+  Future<void> _seekBackward() async {
+    final position = _player.position;
+
+    final newPosition = position - const Duration(seconds: 10);
+
+    await _player.seek(
+      newPosition > Duration.zero ? newPosition : Duration.zero,
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +123,15 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.keyboard_arrow_down),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Now Playing',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -94,6 +193,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         const SizedBox(height: 6),
                         Text(
                           widget.artistName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: Colors.white60,
                             fontSize: 16,
@@ -102,6 +203,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ],
                     ),
                   ),
+
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -119,44 +221,84 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 ],
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
-              // Progress bar
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: Colors.white,
-                  inactiveTrackColor: Colors.white24,
-                  thumbColor: Colors.white,
-                  overlayColor: Colors.white12,
-                  trackHeight: 4,
-                ),
-                child: Slider(
-                  value: progress,
-                  min: 0,
-                  max: 1,
-                  onChanged: (value) {
-                    setState(() {
-                      progress = value;
-                    });
-                  },
-                ),
-              ),
+              // Progress
+              StreamBuilder<Duration>(
+                stream: _player.positionStream,
+                builder: (context, snapshot) {
+                  final position = snapshot.data ?? Duration.zero;
+                  final duration = _player.duration ?? Duration.zero;
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '1:24',
-                      style: TextStyle(color: Colors.white54),
-                    ),
-                    Text(
-                      '3:42',
-                      style: TextStyle(color: Colors.white54),
-                    ),
-                  ],
-                ),
+                  double value = 0;
+
+                  if (duration.inMilliseconds > 0) {
+                    value =
+                        position.inMilliseconds /
+                        duration.inMilliseconds;
+
+                    if (value > 1) {
+                      value = 1;
+                    }
+
+                    if (value < 0) {
+                      value = 0;
+                    }
+                  }
+
+                  return Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.white,
+                          inactiveTrackColor: Colors.white24,
+                          thumbColor: Colors.white,
+                          overlayColor: Colors.white12,
+                          trackHeight: 4,
+                        ),
+                        child: Slider(
+                          value: value,
+                          min: 0,
+                          max: 1,
+                          onChanged: duration.inMilliseconds == 0
+                              ? null
+                              : (newValue) {
+                                  final newPosition = Duration(
+                                    milliseconds:
+                                        (duration.inMilliseconds *
+                                                newValue)
+                                            .round(),
+                                  );
+
+                                  _player.seek(newPosition);
+                                },
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _formatDuration(position),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                              ),
+                            ),
+                            Text(
+                              _formatDuration(duration),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 20),
@@ -172,14 +314,16 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       color: Colors.white70,
                     ),
                   ),
+
                   IconButton(
-                    onPressed: () {},
+                    onPressed: _seekBackward,
                     icon: const Icon(
-                      Icons.skip_previous_rounded,
+                      Icons.replay_10_rounded,
                       color: Colors.white,
-                      size: 40,
+                      size: 36,
                     ),
                   ),
+
                   Container(
                     width: 72,
                     height: 72,
@@ -187,29 +331,35 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isPlaying = !isPlaying;
-                        });
-                      },
-                      icon: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: Colors.black,
-                        size: 40,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: Colors.black,
+                            ),
+                          )
+                        : IconButton(
+                            onPressed: _playPause,
+                            icon: Icon(
+                              _player.playing
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
+                              color: Colors.black,
+                              size: 40,
+                            ),
+                          ),
                   ),
+
                   IconButton(
-                    onPressed: () {},
+                    onPressed: _seekForward,
                     icon: const Icon(
-                      Icons.skip_next_rounded,
+                      Icons.forward_10_rounded,
                       color: Colors.white,
-                      size: 40,
+                      size: 36,
                     ),
                   ),
+
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(
