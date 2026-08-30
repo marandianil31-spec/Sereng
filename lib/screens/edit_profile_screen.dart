@@ -302,7 +302,7 @@ class _ProfileField extends StatelessWidget {
             ),
             prefixIcon: Icon(
               icon,
-              color: Colors.white45,
+              color: Colors.white54,
             ),
             filled: true,
             fillColor: const Color(0xFF141419),
@@ -317,7 +317,7 @@ class _ProfileField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: const BorderSide(
-                color: Colors.white08,
+                color: Colors.white10,
               ),
             ),
             focusedBorder: OutlineInputBorder(
