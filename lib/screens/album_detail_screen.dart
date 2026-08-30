@@ -138,7 +138,7 @@ class AlbumDetailScreen extends StatelessWidget {
                   const Text(
                     '2026 • Album • 6 songs',
                     style: TextStyle(
-                      color: Colors.white45,
+                      color: Colors.white54,
                       fontSize: 12,
                     ),
                   ),
@@ -324,7 +324,7 @@ class AlbumSongTile extends StatelessWidget {
                 Text(
                   duration,
                   style: const TextStyle(
-                    color: Colors.white45,
+                    color: Colors.white54,
                     fontSize: 11,
                   ),
                 ),
