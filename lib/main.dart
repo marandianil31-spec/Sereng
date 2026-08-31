@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/music_player_screen.dart';
+import 'screens/explore_screen.dart';
 
 void main() {
   runApp(const SerengApp());
@@ -236,19 +237,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class ExploreScreen extends StatelessWidget {
-  const ExploreScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SimpleScreen(
-      icon: Icons.explore,
-      title: 'Explore',
-      subtitle: 'Discover new music',
     );
   }
 }
