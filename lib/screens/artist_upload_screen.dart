@@ -697,8 +697,4 @@ class _ArtistUploadScreenState
           borderSide:
               BorderSide.none,
         ),
-      ),
-     );
-  }
-}
-  )
+      
