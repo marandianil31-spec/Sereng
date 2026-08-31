@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -30,8 +30,11 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sereng-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" \
+            build/app/outputs/flutter-apk/app-release.apk \
+            --title "SERENG v1.0.${{ github.run_number }}" \
+            --notes "SERENG Android APK"
