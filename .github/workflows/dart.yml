@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -26,12 +26,12 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
       - name: Build APK
         run: flutter build apk --release
-      - name: Upload APK to Release
-        uses: softprops/action-gh-release@v2
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Sereng APK v1.0.${{ github.run_number }}
-          files: build/app/outputs/flutter-apk/app-release.apk
-      
+          name: Sereng-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
