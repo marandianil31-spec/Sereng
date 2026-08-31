@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 
 class ArtistUploadScreen extends StatefulWidget {
   const ArtistUploadScreen({super.key});
@@ -19,6 +19,8 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
   String? coverFileName;
   String? audioFileName;
 
+  bool isSubmitting = false;
+
   final List<String> genres = [
     'Santhali',
     'Hindi',
@@ -36,70 +38,49 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
     super.dispose();
   }
 
-  // Pick cover image
   Future<void> pickCoverImage() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-      );
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
 
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          coverFileName = result.files.first.name;
-        });
+    if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cover image selected successfully.'),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Image select nahi ho payi: $e'),
-        ),
-      );
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        coverFileName = result.files.first.name;
+      });
     }
   }
 
-  // Pick audio file
   Future<void> pickAudioFile() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: [
-          'mp3',
-          'wav',
-          'm4a',
-          'aac',
-          'ogg',
-        ],
-      );
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'mp3',
+        'wav',
+        'm4a',
+        'aac',
+        'flac',
+        'ogg',
+      ],
+      allowMultiple: false,
+    );
 
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          audioFileName = result.files.first.name;
-        });
+    if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Audio file selected successfully.'),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Audio select nahi ho paya: $e'),
-        ),
-      );
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        audioFileName = result.files.first.name;
+      });
     }
   }
 
   void submitSong() {
-    if (artistController.text.trim().isEmpty ||
-        songController.text.trim().isEmpty) {
+    final artist = artistController.text.trim();
+    final song = songController.text.trim();
+
+    if (artist.isEmpty || song.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -110,31 +91,37 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
       return;
     }
 
-    if (coverFileName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a cover image.'),
-        ),
-      );
-      return;
-    }
-
     if (audioFileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select an audio file.'),
+          content: Text(
+            'Please select an audio file.',
+          ),
         ),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Song selected successfully. Firebase upload will be connected next.',
+    setState(() {
+      isSubmitting = true;
+    });
+
+    // Firebase upload/approval system baad me connect karenge.
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+
+      setState(() {
+        isSubmitting = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Song submitted for approval.',
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   @override
@@ -156,7 +143,12 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 35),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          35,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -174,7 +166,8 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 ),
               ),
               child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Icon(
                     Icons.cloud_upload_rounded,
@@ -277,7 +270,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Cover image
+            // Cover Image
             const Text(
               'Cover Image',
               style: TextStyle(
@@ -303,10 +296,12 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 ),
                 child: coverFileName == null
                     ? const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.add_photo_alternate_outlined,
+                            Icons
+                                .add_photo_alternate_outlined,
                             size: 45,
                             color: Colors.white54,
                           ),
@@ -328,33 +323,38 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                         ],
                       )
                     : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
                         children: [
                           const Icon(
-                            Icons.check_circle,
+                            Icons.check_circle_rounded,
                             size: 45,
                             color: Colors.greenAccent,
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            'Cover Selected',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
                           Padding(
-                            padding: const EdgeInsets.symmetric(
+                            padding:
+                                const EdgeInsets.symmetric(
                               horizontal: 20,
                             ),
                             child: Text(
                               coverFileName!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              overflow:
+                                  TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
                               style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Tap to change image',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
                             ),
                           ),
                         ],
@@ -364,7 +364,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Audio file
+            // Audio File
             const Text(
               'Audio File',
               style: TextStyle(
@@ -388,82 +388,53 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                     color: Colors.white12,
                   ),
                 ),
-                child: audioFileName == null
-                    ? const Row(
+                child: Row(
+                  children: [
+                    Icon(
+                      audioFileName == null
+                          ? Icons.audio_file_outlined
+                          : Icons.check_circle_rounded,
+                      size: 40,
+                      color: audioFileName == null
+                          ? Colors.white54
+                          : Colors.greenAccent,
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.audio_file_outlined,
-                            size: 40,
-                            color: Colors.white54,
-                          ),
-                          SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Select Audio File',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  'MP3, WAV, M4A, AAC or OGG',
-                                  style: TextStyle(
-                                    color: Colors.white38,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            audioFileName == null
+                                ? 'Select Audio File'
+                                : audioFileName!,
+                            maxLines: 2,
+                            overflow:
+                                TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Colors.white38,
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle,
-                            size: 40,
-                            color: Colors.greenAccent,
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Audio Selected',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  audioFileName!,
-                                  maxLines: 1,
-                                  overflow:
-                                      TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 5),
+                          Text(
+                            audioFileName == null
+                                ? 'MP3, WAV or supported audio'
+                                : 'Tap to change audio',
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
                             ),
-                          ),
-                          const Icon(
-                            Icons.chevron_right,
-                            color: Colors.white38,
                           ),
                         ],
                       ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Colors.white38,
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -503,7 +474,7 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
 
             const SizedBox(height: 25),
 
-            // Approval notice
+            // Approval Notice
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -541,11 +512,26 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: submitSong,
-                icon: const Icon(Icons.upload_rounded),
-                label: const Text(
-                  'Submit for Approval',
-                  style: TextStyle(
+                onPressed:
+                    isSubmitting ? null : submitSong,
+                icon: isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child:
+                            CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.upload_rounded,
+                      ),
+                label: Text(
+                  isSubmitting
+                      ? 'Submitting...'
+                      : 'Submit for Approval',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -553,6 +539,10 @@ class _ArtistUploadScreenState extends State<ArtistUploadScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
+                  disabledBackgroundColor:
+                      Colors.white70,
+                  disabledForegroundColor:
+                      Colors.black54,
                   shape: RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(15),
