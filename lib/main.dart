@@ -242,17 +242,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-
-  @override
-  Widget build(BuildContext context) {
-    return const SimpleScreen(
-      icon: Icons.library_music,
-      title: 'Your Library',
-      subtitle: 'Your songs and playlists',
-    );
-  }
-}
-
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
