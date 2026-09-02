@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/music_player_screen.dart';
 import 'screens/explore_screen.dart';
+import 'screens/library_screen.dart';
 
 void main() {
   runApp(const SerengApp());
@@ -241,8 +242,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class LibraryScreen extends StatelessWidget {
-  const LibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
