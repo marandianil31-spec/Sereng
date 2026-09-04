@@ -1,3 +1,4 @@
+import 'screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/music_player_screen.dart';
 import 'screens/explore_screen.dart';
@@ -241,18 +242,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SimpleScreen(
-      icon: Icons.person,
-      title: 'Profile',
-      subtitle: 'Your Sereng profile',
-    );
-  }
 }
 
 class SimpleScreen extends StatelessWidget {
