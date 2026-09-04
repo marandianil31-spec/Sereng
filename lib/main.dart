@@ -1,3 +1,4 @@
+import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/music_player_screen.dart';
