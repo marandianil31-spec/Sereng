@@ -242,7 +242,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-}
 
 class SimpleScreen extends StatelessWidget {
   final IconData icon;
