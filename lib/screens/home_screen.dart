@@ -1,5 +1,6 @@
 
 import 'recently_played_screen.dart';
+import 'search_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -20,10 +21,17 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
+        IconButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SearchScreen(),
+      ),
+    );
+  },
+  icon: const Icon(Icons.search),
+),
           ),
           IconButton(
             onPressed: () {},
