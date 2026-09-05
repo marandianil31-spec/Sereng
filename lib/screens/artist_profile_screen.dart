@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'music_player_screen.dart';
 
 class ArtistProfileScreen extends StatefulWidget {
   const ArtistProfileScreen({super.key});
@@ -11,41 +12,17 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
   bool isFollowing = false;
 
   final List<Map<String, String>> songs = [
-    {
-      'title': 'Johar Re',
-      'subtitle': 'Popular Song',
-    },
-    {
-      'title': 'Adivasi Beats',
-      'subtitle': 'Latest Release',
-    },
-    {
-      'title': 'Sarna Song',
-      'subtitle': 'Popular Song',
-    },
-    {
-      'title': 'New Santhali Song',
-      'subtitle': 'Single',
-    },
-    {
-      'title': 'Disom Re',
-      'subtitle': 'Album Track',
-    },
+    {'title': 'Johar Re', 'subtitle': 'Popular Song'},
+    {'title': 'Adivasi Beats', 'subtitle': 'Latest Release'},
+    {'title': 'Sarna Song', 'subtitle': 'Popular Song'},
+    {'title': 'New Santhali Song', 'subtitle': 'Single'},
+    {'title': 'Disom Re', 'subtitle': 'Album Track'},
   ];
 
   final List<Map<String, String>> albums = [
-    {
-      'title': 'Johar',
-      'year': '2026',
-    },
-    {
-      'title': 'Adivasi Beats',
-      'year': '2025',
-    },
-    {
-      'title': 'Sarna',
-      'year': '2025',
-    },
+    {'title': 'Johar', 'year': '2026'},
+    {'title': 'Adivasi Beats', 'year': '2025'},
+    {'title': 'Sarna', 'year': '2025'},
   ];
 
   @override
@@ -65,9 +42,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
               ),
               title: const Text(
                 'Artist',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
               actions: [
                 IconButton(
@@ -99,9 +74,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                         color: Colors.white54,
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -128,9 +101,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 7),
-
                     const Text(
                       'Santhali Music Artist',
                       style: TextStyle(
@@ -138,76 +109,27 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                         fontSize: 13,
                       ),
                     ),
-
                     const SizedBox(height: 14),
-
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            Text(
-                              '12.5K',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              'Followers',
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                        _StatItem(
+                          value: '12.5K',
+                          label: 'Followers',
                         ),
                         SizedBox(width: 35),
-                        Column(
-                          children: [
-                            Text(
-                              '38',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              'Songs',
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                        _StatItem(
+                          value: '38',
+                          label: 'Songs',
                         ),
                         SizedBox(width: 35),
-                        Column(
-                          children: [
-                            Text(
-                              '6',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              'Albums',
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                        _StatItem(
+                          value: '6',
+                          label: 'Albums',
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 18),
-
                     Row(
                       children: [
                         Expanded(
@@ -228,8 +150,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                                     : Colors.black,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                               child: Text(
@@ -264,29 +185,15 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
               ),
             ),
 
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 22, 18, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Popular Songs',
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'See all',
-                        style: TextStyle(
-                          color: Colors.white60,
-                        ),
-                      ),
-                    ),
-                  ],
+                padding: EdgeInsets.fromLTRB(18, 22, 18, 12),
+                child: Text(
+                  'Popular Songs',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -313,7 +220,6 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-
                         Container(
                           width: 52,
                           height: 52,
@@ -326,13 +232,10 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                             color: Colors.white70,
                           ),
                         ),
-
                         const SizedBox(width: 12),
-
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 song['title']!,
@@ -354,8 +257,19 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                           ),
                         ),
 
+                        // Play Song
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MusicPlayerScreen(
+                                  songTitle: song['title']!,
+                                  artistName: 'SERENG Artist',
+                                ),
+                              ),
+                            );
+                          },
                           icon: const Icon(
                             Icons.play_circle_fill_rounded,
                             size: 28,
@@ -377,29 +291,15 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
               ),
             ),
 
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 25, 18, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Albums',
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'See all',
-                        style: TextStyle(
-                          color: Colors.white60,
-                        ),
-                      ),
-                    ),
-                  ],
+                padding: EdgeInsets.fromLTRB(18, 25, 18, 12),
+                child: Text(
+                  'Albums',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -408,8 +308,7 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
               child: SizedBox(
                 height: 175,
                 child: ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   scrollDirection: Axis.horizontal,
                   itemCount: albums.length,
                   itemBuilder: (context, index) {
@@ -419,16 +318,14 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
                       width: 145,
                       margin: const EdgeInsets.only(right: 12),
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             width: 145,
                             height: 125,
                             decoration: BoxDecoration(
                               color: const Color(0xFF24202D),
-                              borderRadius:
-                                  BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: const Icon(
                               Icons.album_rounded,
@@ -467,6 +364,39 @@ class _ArtistProfileScreenState extends State<ArtistProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _StatItem({
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 11,
+          ),
+        ),
+      ],
     );
   }
 }
