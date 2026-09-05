@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sereng/main.dart';
 
 void main() {
-  testWidgets('Sereng app smoke test', (WidgetTester tester) async {
+  testWidgets('SERENG app smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const SerengApp());
 
-    expect(find.text('Recently Played'), findsOneWidget);
-    expect(find.text('Midnight'), findsOneWidget);
-    expect(find.text('Dreamscape'), findsOneWidget);
+    expect(find.text('SERENG'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Explore'), findsOneWidget);
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 }
