@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'search_screen.dart';
+import 'notifications_screen.dart';
 import 'recently_played_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -22,6 +23,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          // Search
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -33,8 +35,17 @@ class HomeScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.search),
           ),
+
+          // Notifications
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
             icon: const Icon(Icons.notifications_none_rounded),
           ),
         ],
@@ -49,9 +60,7 @@ class HomeScreen extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-
           const SizedBox(height: 5),
-
           const Text(
             'Listen to your vibe.',
             style: TextStyle(
@@ -59,7 +68,6 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 22),
 
           // Featured Playlist
@@ -150,7 +158,6 @@ class HomeScreen extends StatelessWidget {
             title: 'Santhali Melody',
             artist: 'SERENG Artist',
           ),
-
           const HomeSongTile(
             title: 'Adivasi Song',
             artist: 'SERENG Artist',
@@ -168,12 +175,10 @@ class HomeScreen extends StatelessWidget {
             title: 'Johar Re',
             artist: 'Santhali Artist',
           ),
-
           const HomeSongTile(
             title: 'Nawa Geet',
             artist: 'SERENG Artist',
           ),
-
           const HomeSongTile(
             title: 'Ayo Re',
             artist: 'Santhali Artist',
@@ -220,7 +225,6 @@ class HomeScreen extends StatelessWidget {
             title: 'New Santhali Song',
             artist: 'SERENG Artist',
           ),
-
           const NewReleaseCard(
             title: 'Nawa Release',
             artist: 'Santhali Artist',
