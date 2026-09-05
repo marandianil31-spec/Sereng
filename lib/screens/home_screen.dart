@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'search_screen.dart';
 import 'notifications_screen.dart';
 import 'recently_played_screen.dart';
+import 'music_player_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // Search
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -35,8 +35,6 @@ class HomeScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.search),
           ),
-
-          // Notifications
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -326,7 +324,17 @@ class HomeSongTile extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MusicPlayerScreen(
+                    songTitle: title,
+                    artistName: artist,
+                  ),
+                ),
+              );
+            },
             icon: const Icon(
               Icons.play_circle_fill_rounded,
               size: 32,
@@ -439,7 +447,17 @@ class NewReleaseCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MusicPlayerScreen(
+                    songTitle: title,
+                    artistName: artist,
+                  ),
+                ),
+              );
+            },
             icon: const Icon(
               Icons.play_circle_fill_rounded,
               size: 34,
