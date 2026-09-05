@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'music_player_screen.dart';
 
 class AlbumDetailScreen extends StatelessWidget {
   final String albumName;
