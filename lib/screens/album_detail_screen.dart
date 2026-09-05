@@ -1,5 +1,8 @@
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+
+import 'music_player_screen.dart';
 
 class AlbumDetailScreen extends StatelessWidget {
   final String albumName;
@@ -39,6 +42,31 @@ class AlbumDetailScreen extends StatelessWidget {
         'duration': '4:20',
       },
     ];
+
+    void openPlayer(String title) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MusicPlayerScreen(
+            songTitle: title,
+            artistName: artistName,
+          ),
+        ),
+      );
+    }
+
+    void playAll() {
+      if (songs.isEmpty) return;
+
+      openPlayer(songs.first['title']!);
+    }
+
+    void shuffle() {
+      if (songs.isEmpty) return;
+
+      final randomIndex = Random().nextInt(songs.length);
+      openPlayer(songs[randomIndex]['title']!);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
@@ -152,7 +180,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         child: SizedBox(
                           height: 50,
                           child: OutlinedButton.icon(
-                            onPressed: () {},
+                            onPressed: shuffle,
                             icon: const Icon(Icons.shuffle),
                             label: const Text('Shuffle'),
                             style: OutlinedButton.styleFrom(
@@ -175,7 +203,7 @@ class AlbumDetailScreen extends StatelessWidget {
                         child: SizedBox(
                           height: 50,
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: playAll,
                             icon: const Icon(
                               Icons.play_arrow_rounded,
                             ),
@@ -215,6 +243,9 @@ class AlbumDetailScreen extends StatelessWidget {
                         number: '${index + 1}'.padLeft(2, '0'),
                         title: song['title']!,
                         duration: song['duration']!,
+                        onPlay: () {
+                          openPlayer(song['title']!);
+                        },
                       );
                     },
                   ),
@@ -254,12 +285,14 @@ class AlbumSongTile extends StatelessWidget {
   final String number;
   final String title;
   final String duration;
+  final VoidCallback onPlay;
 
   const AlbumSongTile({
     super.key,
     required this.number,
     required this.title,
     required this.duration,
+    required this.onPlay,
   });
 
   @override
@@ -334,7 +367,7 @@ class AlbumSongTile extends StatelessWidget {
           ),
 
           IconButton(
-            onPressed: () {},
+            onPressed: onPlay,
             icon: const Icon(
               Icons.play_circle_outline,
               size: 30,
