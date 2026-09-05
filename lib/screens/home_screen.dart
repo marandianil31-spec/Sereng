@@ -21,24 +21,26 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-        actions: [
-  IconButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SearchScreen(),
+              ),
+      actions: [
+        IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SearchScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.search),
         ),
-      );
-    },
-    icon: const Icon(Icons.search),
-  ),
-  IconButton(
-    onPressed: () {},
-    icon: const Icon(Icons.notifications_none_rounded),
-  ),
-],
-
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_none_rounded),
+        ),
+      ],
+    ),
+    body: ListView(
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 35),
         children: [
