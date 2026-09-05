@@ -1,7 +1,7 @@
-
-import 'recently_played_screen.dart';
-import 'search_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'search_screen.dart';
+import 'recently_played_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,26 +21,24 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-              ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SearchScreen(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.search),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.notifications_none_rounded),
-        ),
-      ],
-    ),
-    body: ListView(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SearchScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.search),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none_rounded),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 35),
         children: [
@@ -55,7 +53,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 5),
 
           const Text(
-            'Listen to your vibe',
+            'Listen to your vibe.',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -64,7 +62,7 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 22),
 
-          // Featured playlist
+          // Featured Playlist
           Container(
             height: 195,
             padding: const EdgeInsets.all(20),
@@ -89,178 +87,143 @@ class HomeScreen extends StatelessWidget {
                       const Text(
                         'FEATURED PLAYLIST',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
                         ),
                       ),
-
-                      const SizedBox(height: 9),
-
+                      const SizedBox(height: 10),
                       const Text(
                         'Santhali Hits',
                         style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 27,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 5),
-
                       const Text(
                         'Best songs for your mood',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12,
+                          fontSize: 13,
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
-                      SizedBox(
-                        height: 38,
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.play_arrow,
-                            size: 20,
-                          ),
-                          label: const Text('Play Now'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 13,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-                          ),
+                      ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Play Now'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const Icon(
-                  Icons.album_rounded,
-                  size: 82,
+                  Icons.music_note_rounded,
+                  size: 80,
                   color: Colors.white24,
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 28),
 
-          const HomeSectionTitle(
+          HomeSectionTitle(
             title: 'Recently Played',
+            onSeeAll: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const RecentlyPlayedScreen(),
+                ),
+              );
+            },
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          SizedBox(
-            height: 180,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: const [
-                HomeMusicCard(
-                  title: 'Dular Re',
-                  artist: 'Rahul Murmu',
-                  icon: Icons.music_note_rounded,
-                ),
-                HomeMusicCard(
-                  title: 'Baha Bonga',
-                  artist: 'Pankaj Murmu',
-                  icon: Icons.nightlight_round,
-                ),
-                HomeMusicCard(
-                  title: 'Dular Gate',
-                  artist: 'Stephan Tudu',
-                  icon: Icons.favorite_rounded,
-                ),
-              ],
-            ),
+          const HomeSongTile(
+            title: 'Santhali Melody',
+            artist: 'SERENG Artist',
           ),
 
-          const SizedBox(height: 30),
+          const HomeSongTile(
+            title: 'Adivasi Song',
+            artist: 'SERENG Artist',
+          ),
+
+          const SizedBox(height: 18),
 
           const HomeSectionTitle(
             title: 'Trending Songs',
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           const HomeSongTile(
-            number: '01',
-            title: 'Dular Re',
-            artist: 'Rahul Murmu',
+            title: 'Johar Re',
+            artist: 'Santhali Artist',
           ),
 
           const HomeSongTile(
-            number: '02',
-            title: 'Baha Bonga',
-            artist: 'Pankaj Murmu',
+            title: 'Nawa Geet',
+            artist: 'SERENG Artist',
           ),
 
           const HomeSongTile(
-            number: '03',
-            title: 'Dular Gate',
-            artist: 'Stephan Tudu',
+            title: 'Ayo Re',
+            artist: 'Santhali Artist',
           ),
 
-          const HomeSongTile(
-            number: '04',
-            title: 'Amge Mon',
-            artist: 'Stephan Tudu',
-          ),
-
-          const SizedBox(height: 28),
+          const SizedBox(height: 18),
 
           const HomeSectionTitle(
             title: 'Popular Artists',
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           SizedBox(
-            height: 115,
+            height: 125,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: const [
                 HomeArtistCard(
-                  name: 'Rahul Murmu',
+                  name: 'Santhali Artist',
                 ),
                 HomeArtistCard(
-                  name: 'Pankaj Murmu',
+                  name: 'SERENG Artist',
                 ),
                 HomeArtistCard(
-                  name: 'Stephan Tudu',
+                  name: 'New Artist',
                 ),
                 HomeArtistCard(
-                  name: 'Luna',
+                  name: 'Adivasi Artist',
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 25),
 
           const HomeSectionTitle(
             title: 'New Releases',
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           const NewReleaseCard(
-            title: 'Amge Mon',
-            artist: 'Stephan Tudu',
+            title: 'New Santhali Song',
+            artist: 'SERENG Artist',
           ),
 
           const NewReleaseCard(
-            title: 'Johar Re',
-            artist: 'Rahul Murmu',
+            title: 'Nawa Release',
+            artist: 'Santhali Artist',
           ),
         ],
       ),
@@ -270,10 +233,12 @@ class HomeScreen extends StatelessWidget {
 
 class HomeSectionTitle extends StatelessWidget {
   final String title;
+  final VoidCallback? onSeeAll;
 
   const HomeSectionTitle({
     super.key,
     required this.title,
+    this.onSeeAll,
   });
 
   @override
@@ -284,110 +249,26 @@ class HomeSectionTitle extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 21,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-                TextButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const RecentlyPlayedScreen(),
-              ),
-            );
-          },
-          child: const Text(
-            'See all',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-            ),
+        if (onSeeAll != null)
+          TextButton(
+            onPressed: onSeeAll,
+            child: const Text('See all'),
           ),
-        ),
-      ]
-    );
-  }
-}
-
-class HomeMusicCard extends StatelessWidget {
-  final String title;
-  final String artist;
-  final IconData icon;
-
-  const HomeMusicCard({
-    super.key,
-    required this.title,
-    required this.artist,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 145,
-      margin: const EdgeInsets.only(right: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 125,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF27272A),
-                  Color(0xFF18181B),
-                ],
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                icon,
-                size: 55,
-                color: Colors.white54,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 3),
-
-          Text(
-            artist,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
 
 class HomeSongTile extends StatelessWidget {
-  final String number;
   final String title;
   final String artist;
 
   const HomeSongTile({
     super.key,
-    required this.number,
     required this.title,
     required this.artist,
   });
@@ -395,52 +276,33 @@ class HomeSongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 9,
+        horizontal: 12,
+        vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF141419),
+        color: const Color(0xFF15151B),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Colors.white38,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
           Container(
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
+              color: const Color(0xFF24242D),
               borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFFEC4899),
-                ],
-              ),
             ),
             child: const Icon(
-              Icons.music_note_rounded,
-              color: Colors.white,
+              Icons.music_note,
+              color: Colors.white70,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -459,12 +321,11 @@ class HomeSongTile extends StatelessWidget {
               ],
             ),
           ),
-
           IconButton(
             onPressed: () {},
             icon: const Icon(
-              Icons.play_circle_outline,
-              size: 30,
+              Icons.play_circle_fill_rounded,
+              size: 32,
             ),
           ),
         ],
@@ -484,39 +345,31 @@ class HomeArtistCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 95,
-      margin: const EdgeInsets.only(right: 18),
+      width: 105,
+      margin: const EdgeInsets.only(right: 14),
       child: Column(
         children: [
           Container(
-            width: 70,
-            height: 70,
+            width: 82,
+            height: 82,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFFEC4899),
-                ],
-              ),
+              color: Color(0xFF24242D),
             ),
             child: const Icon(
-              Icons.person_rounded,
-              size: 35,
-              color: Colors.white,
+              Icons.person,
+              size: 42,
+              color: Colors.white54,
             ),
           ),
-
           const SizedBox(height: 8),
-
           Text(
             name,
-            textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
         ],
@@ -538,39 +391,31 @@ class NewReleaseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF141419),
-        borderRadius: BorderRadius.circular(15),
+        color: const Color(0xFF15151B),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           Container(
-            width: 62,
-            height: 62,
+            width: 65,
+            height: 65,
             decoration: BoxDecoration(
+              color: const Color(0xFF24242D),
               borderRadius: BorderRadius.circular(12),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFEC4899),
-                  Color(0xFF7C3AED),
-                ],
-              ),
             ),
             child: const Icon(
-              Icons.album_rounded,
-              size: 30,
-              color: Colors.white,
+              Icons.album,
+              size: 32,
+              color: Colors.white54,
             ),
           ),
-
-          const SizedBox(width: 13),
-
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -586,23 +431,14 @@ class NewReleaseCard extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'New release',
-                  style: TextStyle(
-                    color: Colors.white30,
-                    fontSize: 10,
-                  ),
-                ),
               ],
             ),
           ),
-
           IconButton(
             onPressed: () {},
             icon: const Icon(
-              Icons.play_circle_outline,
-              size: 30,
+              Icons.play_circle_fill_rounded,
+              size: 34,
             ),
           ),
         ],
