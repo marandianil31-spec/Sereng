@@ -4,6 +4,7 @@ import 'search_screen.dart';
 import 'notifications_screen.dart';
 import 'recently_played_screen.dart';
 import 'music_player_screen.dart';
+import 'artist_profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -356,35 +357,45 @@ class HomeArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 105,
-      margin: const EdgeInsets.only(right: 14),
-      child: Column(
-        children: [
-          Container(
-            width: 82,
-            height: 82,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF24242D),
-            ),
-            child: const Icon(
-              Icons.person,
-              size: 42,
-              color: Colors.white54,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ArtistProfileScreen(),
           ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
+        );
+      },
+      child: Container(
+        width: 105,
+        margin: const EdgeInsets.only(right: 14),
+        child: Column(
+          children: [
+            Container(
+              width: 82,
+              height: 82,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF24242D),
+              ),
+              child: const Icon(
+                Icons.person,
+                size: 42,
+                color: Colors.white54,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
