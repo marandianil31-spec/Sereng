@@ -1,279 +1,288 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import 'music_player_screen.dart';
+import 'album_detail_screen.dart';
 
-class AlbumDetailScreen extends StatelessWidget {
+class AlbumScreen extends StatelessWidget {
   final String albumName;
   final String artistName;
 
-  const AlbumDetailScreen({
+  const AlbumScreen({
     super.key,
-    this.albumName = 'Dular Re',
-    this.artistName = 'Rahul Murmu',
+    this.albumName = 'Santhali Hits',
+    this.artistName = 'Sereng Artists',
   });
+
+  final List<AlbumSong> songs = const [
+    AlbumSong(
+      title: 'Dular Re',
+      duration: '3:42',
+    ),
+    AlbumSong(
+      title: 'Baha Bonga',
+      duration: '4:10',
+    ),
+    AlbumSong(
+      title: 'Dular Gate',
+      duration: '3:55',
+    ),
+    AlbumSong(
+      title: 'Amge Mon',
+      duration: '4:02',
+    ),
+    AlbumSong(
+      title: 'Johar Re',
+      duration: '3:28',
+    ),
+  ];
+
+  void openPlayer(
+    BuildContext context,
+    AlbumSong song,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MusicPlayerScreen(
+          songTitle: song.title,
+          artistName: artistName,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final songs = [
-      {
-        'title': 'Dular Re',
-        'duration': '3:42',
-      },
-      {
-        'title': 'Baha Bonga',
-        'duration': '4:05',
-      },
-      {
-        'title': 'Amge Mon',
-        'duration': '3:51',
-      },
-      {
-        'title': 'Johar Re',
-        'duration': '4:12',
-      },
-      {
-        'title': 'Sari Sari',
-        'duration': '3:36',
-      },
-      {
-        'title': 'Dular Gate',
-        'duration': '4:20',
-      },
-    ];
-
-    void openPlayer(String title) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MusicPlayerScreen(
-            songTitle: title,
-            artistName: artistName,
-          ),
-        ),
-      );
-    }
-
-    void playAll() {
-      if (songs.isEmpty) return;
-
-      openPlayer(songs.first['title']!);
-    }
-
-    void shuffle() {
-      if (songs.isEmpty) return;
-
-      final randomIndex = Random().nextInt(songs.length);
-      openPlayer(songs[randomIndex]['title']!);
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 350,
-            pinned: true,
-            backgroundColor: const Color(0xFF0B0B0F),
-            leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.more_vert),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF3B1B5A),
-                      Color(0xFF18121F),
-                      Color(0xFF0B0B0F),
-                    ],
+
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0B0B0F),
+        elevation: 0,
+
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+
+        title: const Text(
+          'Album',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
+      ),
+
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          30,
+        ),
+
+        children: [
+
+          // Album Cover
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AlbumDetailScreen(
+                    albumName: albumName,
+                    artistName: artistName,
                   ),
                 ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 190,
-                        height: 190,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Color(0xFF7C3AED),
-                              Color(0xFFEC4899),
-                            ],
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black54,
-                              blurRadius: 25,
-                              offset: Offset(0, 12),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.album_rounded,
-                          size: 85,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        albumName,
-                        style: const TextStyle(
-                          fontSize: 27,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        artistName,
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 13,
-                        ),
-                      ),
+              );
+            },
+
+            child: Center(
+              child: Container(
+                width: 220,
+                height: 220,
+
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+
+                    colors: [
+                      Color(0xFF7C3AED),
+                      Color(0xFFEC4899),
                     ],
                   ),
+
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black54,
+                      blurRadius: 25,
+                      offset: Offset(0, 12),
+                    ),
+                  ],
+                ),
+
+                child: const Icon(
+                  Icons.album_rounded,
+                  size: 100,
+                  color: Colors.white70,
                 ),
               ),
             ),
           ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                20,
-                16,
-                35,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '2026 • Album • 6 songs',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12,
-                    ),
-                  ),
+          const SizedBox(height: 25),
 
-                  const SizedBox(height: 20),
+          // Album Name
+          Text(
+            albumName,
+            textAlign: TextAlign.center,
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: OutlinedButton.icon(
-                            onPressed: shuffle,
-                            icon: const Icon(Icons.shuffle),
-                            label: const Text('Shuffle'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white24,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton.icon(
-                            onPressed: playAll,
-                            icon: const Icon(
-                              Icons.play_arrow_rounded,
-                            ),
-                            label: const Text('Play All'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    'Songs',
-                    style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  ...List.generate(
-                    songs.length,
-                    (index) {
-                      final song = songs[index];
-
-                      return AlbumSongTile(
-                        number: '${index + 1}'.padLeft(2, '0'),
-                        title: song['title']!,
-                        duration: song['duration']!,
-                        onPlay: () {
-                          openPlayer(song['title']!);
-                        },
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  const Text(
-                    'About this album',
-                    style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  const Text(
-                    'A collection of popular Santhali songs '
-                    'created for music lovers on SERENG.',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
+            style: const TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.bold,
             ),
+          ),
+
+          const SizedBox(height: 7),
+
+          // Artist Name
+          Text(
+            artistName,
+            textAlign: TextAlign.center,
+
+            style: const TextStyle(
+              color: Colors.white60,
+              fontSize: 15,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            '2026 • 5 Songs • SERENG',
+            textAlign: TextAlign.center,
+
+            style: TextStyle(
+              color: Colors.white38,
+              fontSize: 12,
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          // Shuffle + Play All
+          Row(
+            children: [
+
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    if (songs.isEmpty) return;
+
+                    openPlayer(
+                      context,
+                      songs.first,
+                    );
+                  },
+
+                  icon: const Icon(
+                    Icons.shuffle_rounded,
+                  ),
+
+                  label: const Text(
+                    'Shuffle',
+                  ),
+
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+
+                    side: const BorderSide(
+                      color: Colors.white24,
+                    ),
+
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    if (songs.isEmpty) return;
+
+                    openPlayer(
+                      context,
+                      songs.first,
+                    );
+                  },
+
+                  icon: const Icon(
+                    Icons.play_arrow_rounded,
+                  ),
+
+                  label: const Text(
+                    'Play All',
+                  ),
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 25),
+
+          const Text(
+            'Songs',
+
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          ...songs.asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final song = entry.value;
+
+              return AlbumSongTile(
+                number: index + 1,
+                song: song,
+
+                onPlay: () {
+                  openPlayer(
+                    context,
+                    song,
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
@@ -281,60 +290,85 @@ class AlbumDetailScreen extends StatelessWidget {
   }
 }
 
-class AlbumSongTile extends StatelessWidget {
-  final String number;
+class AlbumSong {
   final String title;
   final String duration;
+
+  const AlbumSong({
+    required this.title,
+    required this.duration,
+  });
+}
+
+class AlbumSongTile extends StatelessWidget {
+  final int number;
+  final AlbumSong song;
   final VoidCallback onPlay;
 
   const AlbumSongTile({
     super.key,
     required this.number,
-    required this.title,
-    required this.duration,
+    required this.song,
     required this.onPlay,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
+      margin: const EdgeInsets.only(
+        bottom: 10,
+      ),
+
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 9,
+        horizontal: 12,
+        vertical: 10,
       ),
+
       decoration: BoxDecoration(
-        color: const Color(0xFF141419),
-        borderRadius: BorderRadius.circular(14),
+        color: const Color(0xFF15151B),
+
+        borderRadius: BorderRadius.circular(
+          14,
+        ),
       ),
+
       child: Row(
         children: [
+
           SizedBox(
-            width: 32,
+            width: 30,
+
             child: Text(
-              number,
+              '$number',
+
+              textAlign: TextAlign.center,
+
               style: const TextStyle(
                 color: Colors.white38,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
           ),
 
+          const SizedBox(width: 10),
+
           Container(
             width: 50,
             height: 50,
+
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFFEC4899),
-                ],
+              borderRadius: BorderRadius.circular(
+                10,
+              ),
+
+              color: const Color(
+                0xFF24242D,
               ),
             ),
+
             child: const Icon(
               Icons.music_note_rounded,
-              color: Colors.white,
+              color: Colors.white54,
             ),
           ),
 
@@ -344,22 +378,32 @@ class AlbumSongTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
+
               children: [
+
                 Text(
-                  title,
+                  song.title,
+
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+
+                  overflow:
+                      TextOverflow.ellipsis,
+
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 15,
+                    fontWeight:
+                        FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+
+                const SizedBox(height: 5),
+
                 Text(
-                  duration,
+                  song.duration,
+
                   style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 11,
+                    color: Colors.white38,
+                    fontSize: 12,
                   ),
                 ),
               ],
@@ -368,18 +412,10 @@ class AlbumSongTile extends StatelessWidget {
 
           IconButton(
             onPressed: onPlay,
-            icon: const Icon(
-              Icons.play_circle_outline,
-              size: 30,
-            ),
-          ),
 
-          IconButton(
-            onPressed: () {},
             icon: const Icon(
-              Icons.more_vert,
-              color: Colors.white38,
-              size: 21,
+              Icons.play_circle_fill_rounded,
+              size: 34,
             ),
           ),
         ],
