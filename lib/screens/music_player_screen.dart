@@ -19,7 +19,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   bool isFavorite = false;
   double currentProgress = 0.5;
 
-  final Duration totalDuration = const Duration(minutes: 6, seconds: 12);
+  final Duration totalDuration = const Duration(
+    minutes: 6,
+    seconds: 12,
+  );
 
   Duration get currentDuration {
     return Duration(
@@ -34,6 +37,20 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     final seconds = duration.inSeconds.remainder(60);
 
     return '$minutes:${twoDigits(seconds)}';
+  }
+
+  void previousSong() {
+    // Future: Previous song logic
+    setState(() {
+      currentProgress = 0;
+    });
+  }
+
+  void nextSong() {
+    // Future: Next song logic
+    setState(() {
+      currentProgress = 0;
+    });
   }
 
   @override
@@ -149,7 +166,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                           ? Icons.favorite
                           : Icons.favorite_border,
                       size: 36,
-                      color: isFavorite ? Colors.redAccent : Colors.white,
+                      color:
+                          isFavorite ? Colors.redAccent : Colors.white,
                     ),
                   ),
                 ],
@@ -175,7 +193,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       formatDuration(currentDuration),
@@ -197,10 +216,12 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               const SizedBox(height: 28),
 
-              // Controls
+              // Music Controls
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Shuffle
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(
@@ -209,21 +230,16 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     ),
                   ),
 
+                  // Previous Song
                   IconButton(
-                    onPressed: () {
-                      setState(() {
-                        currentProgress =
-                            (currentProgress - 10 / totalDuration.inSeconds)
-                                .clamp(0.0, 1.0);
-                      });
-                    },
+                    onPressed: previousSong,
                     icon: const Icon(
-                      Icons.replay_10_rounded,
-                      size: 38,
+                      Icons.skip_previous_rounded,
+                      size: 42,
                     ),
                   ),
 
-                  // Play Button
+                  // Play / Pause
                   GestureDetector(
                     onTap: () {
                       setState(() {
@@ -247,20 +263,16 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     ),
                   ),
 
+                  // Next Song
                   IconButton(
-                    onPressed: () {
-                      setState(() {
-                        currentProgress =
-                            (currentProgress + 10 / totalDuration.inSeconds)
-                                .clamp(0.0, 1.0);
-                      });
-                    },
+                    onPressed: nextSong,
                     icon: const Icon(
-                      Icons.forward_10_rounded,
-                      size: 38,
+                      Icons.skip_next_rounded,
+                      size: 42,
                     ),
                   ),
 
+                  // Repeat
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(
