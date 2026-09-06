@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
   final String songTitle;
@@ -16,63 +15,15 @@ class MusicPlayerScreen extends StatefulWidget {
 }
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
-  final AudioPlayer _player = AudioPlayer();
-
   bool isPlaying = false;
-  Duration duration = Duration.zero;
-  Duration position = Duration.zero;
+  bool isFavorite = false;
+  double currentProgress = 0.5;
 
-  @override
-  void initState() {
-    super.initState();
+  final Duration totalDuration = const Duration(minutes: 6, seconds: 12);
 
-    _player.durationStream.listen((newDuration) {
-      if (newDuration != null) {
-        setState(() {
-          duration = newDuration;
-        });
-      }
-    });
-
-    _player.positionStream.listen((newPosition) {
-      setState(() {
-        position = newPosition;
-      });
-    });
-
-    _player.playerStateStream.listen((state) {
-      setState(() {
-        isPlaying = state.playing;
-      });
-    });
-  }
-
-  Future<void> _togglePlay() async {
-    if (isPlaying) {
-      await _player.pause();
-    } else {
-      // Temporary demo audio URL
-      await _player.setUrl(
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      );
-
-      await _player.play();
-    }
-  }
-
-  Future<void> _seekBackward() async {
-    final newPosition = position - const Duration(seconds: 10);
-
-    await _player.seek(
-      newPosition < Duration.zero ? Duration.zero : newPosition,
-    );
-  }
-
-  Future<void> _seekForward() async {
-    final newPosition = position + const Duration(seconds: 10);
-
-    await _player.seek(
-      newPosition > duration ? duration : newPosition,
+  Duration get currentDuration {
+    return Duration(
+      seconds: (totalDuration.inSeconds * currentProgress).round(),
     );
   }
 
@@ -80,27 +31,15 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
 
     final minutes = duration.inMinutes;
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    final seconds = duration.inSeconds.remainder(60);
 
-    return '$minutes:$seconds';
-  }
-
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
+    return '$minutes:${twoDigits(seconds)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final maxDuration =
-        duration.inMilliseconds.toDouble() > 0
-            ? duration.inMilliseconds.toDouble()
-            : 1.0;
-
-    final currentPosition =
-        position.inMilliseconds.toDouble()
-            .clamp(0.0, maxDuration);
+        totalDuration.inSeconds > 0 ? totalDuration.inSeconds : 1;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
@@ -109,6 +48,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
           padding: const EdgeInsets.all(22),
           child: Column(
             children: [
+              // Top Bar
               Row(
                 children: [
                   IconButton(
@@ -136,40 +76,54 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               const Spacer(),
 
-              Container(
-                width: double.infinity,
+              // Album Cover
+              AspectRatio(
                 aspectRatio: 1,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF7C3AED),
-                      Color(0xFF2563EB),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF7C3AED),
+                        Color(0xFF2563EB),
+                      ],
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black45,
+                        blurRadius: 25,
+                        offset: Offset(0, 12),
+                      ),
                     ],
                   ),
-                ),
-                child: const Icon(
-                  Icons.music_note_rounded,
-                  size: 120,
-                  color: Colors.white70,
+                  child: const Center(
+                    child: Icon(
+                      Icons.music_note_rounded,
+                      size: 120,
+                      color: Colors.white70,
+                    ),
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 45),
+              const SizedBox(height: 55),
 
+              // Song Details
               Row(
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.songTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 27,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -177,18 +131,25 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         Text(
                           widget.artistName,
                           style: const TextStyle(
+                            fontSize: 18,
                             color: Colors.white54,
-                            fontSize: 17,
                           ),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.favorite_border_rounded,
-                      size: 32,
+                    onPressed: () {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
+                    },
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      size: 36,
+                      color: isFavorite ? Colors.redAccent : Colors.white,
                     ),
                   ),
                 ],
@@ -196,84 +157,107 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               const SizedBox(height: 25),
 
+              // Progress Slider
               Slider(
-                value: currentPosition,
+                value: currentProgress * maxDuration,
                 min: 0,
-                max: maxDuration,
+                max: maxDuration.toDouble(),
+                activeColor: Colors.white,
+                inactiveColor: Colors.white24,
                 onChanged: (value) {
-                  _player.seek(
-                    Duration(
-                      milliseconds: value.toInt(),
-                    ),
-                  );
+                  setState(() {
+                    currentProgress = value / maxDuration;
+                  });
                 },
               ),
 
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    formatDuration(position),
-                    style: const TextStyle(
-                      color: Colors.white54,
+              // Time
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      formatDuration(currentDuration),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 15,
+                      ),
                     ),
-                  ),
-                  Text(
-                    formatDuration(duration),
-                    style: const TextStyle(
-                      color: Colors.white54,
+                    Text(
+                      formatDuration(totalDuration),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 15,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
 
+              // Controls
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(
                       Icons.shuffle_rounded,
-                      size: 28,
+                      size: 30,
                     ),
                   ),
 
                   IconButton(
-                    onPressed: _seekBackward,
+                    onPressed: () {
+                      setState(() {
+                        currentProgress =
+                            (currentProgress - 10 / totalDuration.inSeconds)
+                                .clamp(0.0, 1.0);
+                      });
+                    },
                     icon: const Icon(
                       Icons.replay_10_rounded,
-                      size: 36,
+                      size: 38,
                     ),
                   ),
 
-                  Container(
-                    width: 82,
-                    height: 82,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: IconButton(
-                      onPressed: _togglePlay,
-                      icon: Icon(
+                  // Play Button
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isPlaying = !isPlaying;
+                      });
+                    },
+                    child: Container(
+                      width: 88,
+                      height: 88,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Icon(
                         isPlaying
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
-                        size: 48,
+                        size: 55,
                         color: Colors.black,
                       ),
                     ),
                   ),
 
                   IconButton(
-                    onPressed: _seekForward,
+                    onPressed: () {
+                      setState(() {
+                        currentProgress =
+                            (currentProgress + 10 / totalDuration.inSeconds)
+                                .clamp(0.0, 1.0);
+                      });
+                    },
                     icon: const Icon(
                       Icons.forward_10_rounded,
-                      size: 36,
+                      size: 38,
                     ),
                   ),
 
@@ -281,7 +265,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     onPressed: () {},
                     icon: const Icon(
                       Icons.repeat_rounded,
-                      size: 28,
+                      size: 30,
                     ),
                   ),
                 ],
