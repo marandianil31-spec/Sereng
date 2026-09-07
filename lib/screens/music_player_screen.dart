@@ -6,13 +6,15 @@ import 'package:just_audio/just_audio.dart';
 class MusicPlayerScreen extends StatefulWidget {
   final String songTitle;
   final String artistName;
+
+  // Optional audio URL
   final String audioUrl;
 
   const MusicPlayerScreen({
     super.key,
     required this.songTitle,
     required this.artistName,
-    required this.audioUrl,
+    this.audioUrl = '',
   });
 
   @override
@@ -49,12 +51,14 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
   Future<void> _loadSong() async {
     try {
-      if (widget.audioUrl.isEmpty) {
+      final audioUrl = widget.audioUrl;
+
+      if (audioUrl.isEmpty) {
         debugPrint('Audio URL is empty');
         return;
       }
 
-      await _player.setUrl(widget.audioUrl);
+      await _player.setUrl(audioUrl);
     } catch (e) {
       debugPrint('Song load error: $e');
     }
@@ -91,7 +95,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
     try {
       await _player.stop();
+
       await _player.setUrl(audioUrl);
+
       await _player.play();
     } catch (e) {
       debugPrint('Change song error: $e');
@@ -141,10 +147,22 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   Future<void> togglePlay() async {
-    if (_player.playing) {
-      await _player.pause();
-    } else {
-      await _player.play();
+    try {
+      if (_player.playing) {
+        await _player.pause();
+      } else {
+        final currentUrl =
+            songs[currentSongIndex]['audioUrl'] ?? '';
+
+        if (currentUrl.isEmpty) {
+          debugPrint('No audio URL available');
+          return;
+        }
+
+        await _player.play();
+      }
+    } catch (e) {
+      debugPrint('Play error: $e');
     }
   }
 
@@ -153,6 +171,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
         n.toString().padLeft(2, '0');
 
     final minutes = duration.inMinutes;
+
     final seconds =
         duration.inSeconds.remainder(60);
 
@@ -211,14 +230,11 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               // ALBUM COVER
               AspectRatio(
                 aspectRatio: 1,
-
                 child: Container(
                   width: double.infinity,
-
                   decoration: BoxDecoration(
                     borderRadius:
                         BorderRadius.circular(28),
-
                     gradient:
                         const LinearGradient(
                       begin: Alignment.topLeft,
@@ -228,7 +244,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         Color(0xFF2563EB),
                       ],
                     ),
-
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black45,
@@ -237,7 +252,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ),
                     ],
                   ),
-
                   child: const Center(
                     child: Icon(
                       Icons.music_note_rounded,
@@ -261,12 +275,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         Text(
                           currentSong['title'] ??
                               'Unknown Song',
-
                           maxLines: 1,
-
                           overflow:
                               TextOverflow.ellipsis,
-
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight:
@@ -279,7 +290,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         Text(
                           currentSong['artist'] ??
                               'Unknown Artist',
-
                           style: const TextStyle(
                             fontSize: 17,
                             color: Colors.white54,
@@ -295,14 +305,11 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         isFavorite = !isFavorite;
                       });
                     },
-
                     icon: Icon(
                       isFavorite
                           ? Icons.favorite
                           : Icons.favorite_border,
-
                       size: 34,
-
                       color: isFavorite
                           ? Colors.redAccent
                           : Colors.white,
@@ -316,7 +323,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               // PROGRESS BAR
               StreamBuilder<Duration?>(
                 stream: _player.durationStream,
-
                 builder:
                     (context, durationSnapshot) {
                   final duration =
@@ -326,9 +332,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                   return StreamBuilder<Duration>(
                     stream:
                         _player.positionStream,
-
                     builder:
-                        (context, positionSnapshot) {
+                        (context,
+                            positionSnapshot) {
                       var position =
                           positionSnapshot.data ??
                               Duration.zero;
@@ -343,9 +349,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                             value: position
                                 .inMilliseconds
                                 .toDouble(),
-
                             min: 0,
-
                             max: duration
                                         .inMilliseconds >
                                     0
@@ -353,13 +357,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                                     .inMilliseconds
                                     .toDouble()
                                 : 1,
-
                             activeColor:
                                 Colors.white,
-
                             inactiveColor:
                                 Colors.white24,
-
                             onChanged: (value) {
                               _player.seek(
                                 Duration(
@@ -376,18 +377,15 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                                     .symmetric(
                               horizontal: 12,
                             ),
-
                             child: Row(
                               mainAxisAlignment:
                                   MainAxisAlignment
                                       .spaceBetween,
-
                               children: [
                                 Text(
                                   formatDuration(
                                     position,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
@@ -400,7 +398,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                                   formatDuration(
                                     duration,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
@@ -420,11 +417,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               const SizedBox(height: 25),
 
-              // CONTROLS
+              // MUSIC CONTROLS
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.spaceEvenly,
-
                 children: [
                   // SHUFFLE
                   IconButton(
@@ -433,7 +429,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         isShuffle = !isShuffle;
                       });
                     },
-
                     icon: Icon(
                       Icons.shuffle_rounded,
                       size: 30,
@@ -456,7 +451,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                   StreamBuilder<bool>(
                     stream:
                         _player.playingStream,
-
                     builder:
                         (context, snapshot) {
                       final isPlaying =
@@ -464,23 +458,19 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
                       return GestureDetector(
                         onTap: togglePlay,
-
                         child: Container(
                           width: 88,
                           height: 88,
-
                           decoration:
                               const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white,
                           ),
-
                           child: Icon(
                             isPlaying
                                 ? Icons.pause_rounded
                                 : Icons
                                     .play_arrow_rounded,
-
                             size: 55,
                             color: Colors.black,
                           ),
@@ -505,11 +495,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         isRepeat = !isRepeat;
                       });
                     },
-
                     icon: Icon(
                       Icons.repeat_rounded,
                       size: 30,
-
                       color: isRepeat
                           ? Colors.deepPurpleAccent
                           : Colors.white,
