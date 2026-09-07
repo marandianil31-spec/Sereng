@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
   final String songTitle;
@@ -15,67 +16,37 @@ class MusicPlayerScreen extends StatefulWidget {
 }
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
-  bool isPlaying = false;
+  final AudioPlayer _player = AudioPlayer();
+
   bool isFavorite = false;
   bool isShuffle = false;
   bool isRepeat = false;
 
-  double currentProgress = 0.0;
-  int currentSongIndex = 0;
-
-  final Duration totalDuration = const Duration(
-    minutes: 6,
-    seconds: 12,
-  );
-
-  late List<Map<String, String>> songs;
+  final String songUrl =
+      'https://firebasestorage.googleapis.com/v0/b/sereng-31dfd.firebasestorage.app/o/Nawa%20Nawam%20Juwan%20Akana%20Santali%20New%20Video%20%20Full%20Video%20%20Birsa%20Hansdah%20Rupali%20Tudu%20Bunty%20Studio.mp3?alt=media&token=302b6433-0aaa-4ef0-b047-5d0c7973b0ff';
 
   @override
   void initState() {
     super.initState();
-
-    songs = [
-      {
-        'title': widget.songTitle,
-        'artist': widget.artistName,
-      },
-      {
-        'title': 'Johar Re',
-        'artist': 'Santhali Artist',
-      },
-      {
-        'title': 'Baha Bonga',
-        'artist': 'SERENG Artist',
-      },
-      {
-        'title': 'Amge Mon',
-        'artist': 'Stephan Tudu',
-      },
-      {
-        'title': 'Dular Gate',
-        'artist': 'Santhali Artist',
-      },
-    ];
+    _loadSong();
   }
 
-  String get currentTitle {
-    return songs[currentSongIndex]['title'] ?? 'Unknown Song';
+  Future<void> _loadSong() async {
+    try {
+      await _player.setUrl(songUrl);
+    } catch (e) {
+      debugPrint('Song load error: $e');
+    }
   }
 
-  String get currentArtist {
-    return songs[currentSongIndex]['artist'] ?? 'Unknown Artist';
-  }
-
-  Duration get currentDuration {
-    return Duration(
-      seconds: (totalDuration.inSeconds * currentProgress).round(),
-    );
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 
   String formatDuration(Duration duration) {
-    String twoDigits(int number) {
-      return number.toString().padLeft(2, '0');
-    }
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
 
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds.remainder(60);
@@ -84,56 +55,23 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   void previousSong() {
-    setState(() {
-      if (currentSongIndex > 0) {
-        currentSongIndex--;
-      } else {
-        currentSongIndex = songs.length - 1;
-      }
-
-      currentProgress = 0.0;
-      isPlaying = false;
-      isFavorite = false;
-    });
+    _player.seek(Duration.zero);
   }
 
   void nextSong() {
-    setState(() {
-      if (currentSongIndex < songs.length - 1) {
-        currentSongIndex++;
-      } else {
-        currentSongIndex = 0;
-      }
-
-      currentProgress = 0.0;
-      isPlaying = false;
-      isFavorite = false;
-    });
+    _player.seek(Duration.zero);
   }
 
-  void togglePlayPause() {
-    setState(() {
-      isPlaying = !isPlaying;
-    });
-  }
-
-  void toggleShuffle() {
-    setState(() {
-      isShuffle = !isShuffle;
-    });
-  }
-
-  void toggleRepeat() {
-    setState(() {
-      isRepeat = !isRepeat;
-    });
+  Future<void> togglePlay() async {
+    if (_player.playing) {
+      await _player.pause();
+    } else {
+      await _player.play();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final maxDuration =
-        totalDuration.inSeconds > 0 ? totalDuration.inSeconds : 1;
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
       body: SafeArea(
@@ -145,12 +83,11 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                     icon: const Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 32,
+                      color: Colors.white,
                     ),
                   ),
                   const Expanded(
@@ -160,6 +97,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -209,21 +147,21 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          currentTitle,
+                          widget.songTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          currentArtist,
+                          widget.artistName,
                           style: const TextStyle(
                             fontSize: 18,
                             color: Colors.white54,
@@ -253,45 +191,74 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               const SizedBox(height: 25),
 
-              // Progress Slider
-              Slider(
-                value: currentProgress * maxDuration,
-                min: 0,
-                max: maxDuration.toDouble(),
-                activeColor: Colors.white,
-                inactiveColor: Colors.white24,
-                onChanged: (value) {
-                  setState(() {
-                    currentProgress = value / maxDuration;
-                  });
-                },
-              ),
+              // Progress Bar + Time
+              StreamBuilder<Duration?>(
+                stream: _player.durationStream,
+                builder: (context, durationSnapshot) {
+                  final duration =
+                      durationSnapshot.data ?? Duration.zero;
 
-              // Time
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      formatDuration(currentDuration),
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      formatDuration(totalDuration),
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
+                  return StreamBuilder<Duration>(
+                    stream: _player.positionStream,
+                    builder: (context, positionSnapshot) {
+                      var position =
+                          positionSnapshot.data ?? Duration.zero;
+
+                      if (position > duration) {
+                        position = duration;
+                      }
+
+                      return Column(
+                        children: [
+                          Slider(
+                            value: position.inMilliseconds
+                                .toDouble(),
+                            min: 0,
+                            max: duration.inMilliseconds > 0
+                                ? duration.inMilliseconds
+                                    .toDouble()
+                                : 1,
+                            activeColor: Colors.white,
+                            inactiveColor: Colors.white24,
+                            onChanged: (value) {
+                              _player.seek(
+                                Duration(
+                                  milliseconds: value.round(),
+                                ),
+                              );
+                            },
+                          ),
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formatDuration(position),
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Text(
+                                  formatDuration(duration),
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
 
               const SizedBox(height: 28),
@@ -303,12 +270,16 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 children: [
                   // Shuffle
                   IconButton(
-                    onPressed: toggleShuffle,
+                    onPressed: () {
+                      setState(() {
+                        isShuffle = !isShuffle;
+                      });
+                    },
                     icon: Icon(
                       Icons.shuffle_rounded,
                       size: 30,
                       color: isShuffle
-                          ? Colors.deepPurpleAccent
+                          ? Colors.blueAccent
                           : Colors.white,
                     ),
                   ),
@@ -319,27 +290,36 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     icon: const Icon(
                       Icons.skip_previous_rounded,
                       size: 42,
+                      color: Colors.white,
                     ),
                   ),
 
                   // Play / Pause
-                  GestureDetector(
-                    onTap: togglePlayPause,
-                    child: Container(
-                      width: 88,
-                      height: 88,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        size: 55,
-                        color: Colors.black,
-                      ),
-                    ),
+                  StreamBuilder<bool>(
+                    stream: _player.playingStream,
+                    builder: (context, snapshot) {
+                      final isPlaying =
+                          snapshot.data ?? false;
+
+                      return GestureDetector(
+                        onTap: togglePlay,
+                        child: Container(
+                          width: 88,
+                          height: 88,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: Icon(
+                            isPlaying
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                            size: 55,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
                   // Next
@@ -348,17 +328,28 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     icon: const Icon(
                       Icons.skip_next_rounded,
                       size: 42,
+                      color: Colors.white,
                     ),
                   ),
 
                   // Repeat
                   IconButton(
-                    onPressed: toggleRepeat,
+                    onPressed: () async {
+                      setState(() {
+                        isRepeat = !isRepeat;
+                      });
+
+                      await _player.setLoopMode(
+                        isRepeat
+                            ? LoopMode.one
+                            : LoopMode.off,
+                      );
+                    },
                     icon: Icon(
                       Icons.repeat_rounded,
                       size: 30,
                       color: isRepeat
-                          ? Colors.deepPurpleAccent
+                          ? Colors.blueAccent
                           : Colors.white,
                     ),
                   ),
