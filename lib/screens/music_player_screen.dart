@@ -21,11 +21,50 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   bool isRepeat = false;
 
   double currentProgress = 0.0;
+  int currentSongIndex = 0;
 
   final Duration totalDuration = const Duration(
     minutes: 6,
     seconds: 12,
   );
+
+  late List<Map<String, String>> songs;
+
+  @override
+  void initState() {
+    super.initState();
+
+    songs = [
+      {
+        'title': widget.songTitle,
+        'artist': widget.artistName,
+      },
+      {
+        'title': 'Johar Re',
+        'artist': 'Santhali Artist',
+      },
+      {
+        'title': 'Baha Bonga',
+        'artist': 'SERENG Artist',
+      },
+      {
+        'title': 'Amge Mon',
+        'artist': 'Stephan Tudu',
+      },
+      {
+        'title': 'Dular Gate',
+        'artist': 'Santhali Artist',
+      },
+    ];
+  }
+
+  String get currentTitle {
+    return songs[currentSongIndex]['title'] ?? 'Unknown Song';
+  }
+
+  String get currentArtist {
+    return songs[currentSongIndex]['artist'] ?? 'Unknown Artist';
+  }
 
   Duration get currentDuration {
     return Duration(
@@ -34,8 +73,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   String formatDuration(Duration duration) {
-    String twoDigits(int number) =>
-        number.toString().padLeft(2, '0');
+    String twoDigits(int number) {
+      return number.toString().padLeft(2, '0');
+    }
 
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds.remainder(60);
@@ -45,15 +85,29 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
   void previousSong() {
     setState(() {
+      if (currentSongIndex > 0) {
+        currentSongIndex--;
+      } else {
+        currentSongIndex = songs.length - 1;
+      }
+
       currentProgress = 0.0;
       isPlaying = false;
+      isFavorite = false;
     });
   }
 
   void nextSong() {
     setState(() {
+      if (currentSongIndex < songs.length - 1) {
+        currentSongIndex++;
+      } else {
+        currentSongIndex = 0;
+      }
+
       currentProgress = 0.0;
       isPlaying = false;
+      isFavorite = false;
     });
   }
 
@@ -99,7 +153,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       size: 32,
                     ),
                   ),
-
                   const Expanded(
                     child: Text(
                       'Now Playing',
@@ -110,7 +163,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 48),
                 ],
               ),
@@ -161,7 +213,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                           CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.songTitle,
+                          currentTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -169,11 +221,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(height: 8),
-
                         Text(
-                          widget.artistName,
+                          currentArtist,
                           style: const TextStyle(
                             fontSize: 18,
                             color: Colors.white54,
@@ -182,7 +232,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ],
                     ),
                   ),
-
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -234,7 +283,6 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         fontSize: 15,
                       ),
                     ),
-
                     Text(
                       formatDuration(totalDuration),
                       style: const TextStyle(
