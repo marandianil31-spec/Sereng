@@ -17,7 +17,10 @@ class MusicPlayerScreen extends StatefulWidget {
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   bool isPlaying = false;
   bool isFavorite = false;
-  double currentProgress = 0.5;
+  bool isShuffle = false;
+  bool isRepeat = false;
+
+  double currentProgress = 0.0;
 
   final Duration totalDuration = const Duration(
     minutes: 6,
@@ -31,7 +34,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   String formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String twoDigits(int number) =>
+        number.toString().padLeft(2, '0');
 
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds.remainder(60);
@@ -40,16 +44,34 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   void previousSong() {
-    // Future: Previous song logic
     setState(() {
-      currentProgress = 0;
+      currentProgress = 0.0;
+      isPlaying = false;
     });
   }
 
   void nextSong() {
-    // Future: Next song logic
     setState(() {
-      currentProgress = 0;
+      currentProgress = 0.0;
+      isPlaying = false;
+    });
+  }
+
+  void togglePlayPause() {
+    setState(() {
+      isPlaying = !isPlaying;
+    });
+  }
+
+  void toggleShuffle() {
+    setState(() {
+      isShuffle = !isShuffle;
+    });
+  }
+
+  void toggleRepeat() {
+    setState(() {
+      isRepeat = !isRepeat;
     });
   }
 
@@ -77,6 +99,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       size: 32,
                     ),
                   ),
+
                   const Expanded(
                     child: Text(
                       'Now Playing',
@@ -87,6 +110,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 48),
                 ],
               ),
@@ -133,7 +157,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.songTitle,
@@ -144,7 +169,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+
                         const SizedBox(height: 8),
+
                         Text(
                           widget.artistName,
                           style: const TextStyle(
@@ -155,6 +182,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                       ],
                     ),
                   ),
+
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -166,8 +194,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                           ? Icons.favorite
                           : Icons.favorite_border,
                       size: 36,
-                      color:
-                          isFavorite ? Colors.redAccent : Colors.white,
+                      color: isFavorite
+                          ? Colors.redAccent
+                          : Colors.white,
                     ),
                   ),
                 ],
@@ -191,7 +220,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
               // Time
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                ),
                 child: Row(
                   mainAxisAlignment:
                       MainAxisAlignment.spaceBetween,
@@ -203,6 +234,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                         fontSize: 15,
                       ),
                     ),
+
                     Text(
                       formatDuration(totalDuration),
                       style: const TextStyle(
@@ -223,14 +255,17 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 children: [
                   // Shuffle
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
+                    onPressed: toggleShuffle,
+                    icon: Icon(
                       Icons.shuffle_rounded,
                       size: 30,
+                      color: isShuffle
+                          ? Colors.deepPurpleAccent
+                          : Colors.white,
                     ),
                   ),
 
-                  // Previous Song
+                  // Previous
                   IconButton(
                     onPressed: previousSong,
                     icon: const Icon(
@@ -241,11 +276,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
                   // Play / Pause
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isPlaying = !isPlaying;
-                      });
-                    },
+                    onTap: togglePlayPause,
                     child: Container(
                       width: 88,
                       height: 88,
@@ -263,7 +294,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                     ),
                   ),
 
-                  // Next Song
+                  // Next
                   IconButton(
                     onPressed: nextSong,
                     icon: const Icon(
@@ -274,10 +305,13 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
                   // Repeat
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
+                    onPressed: toggleRepeat,
+                    icon: Icon(
                       Icons.repeat_rounded,
                       size: 30,
+                      color: isRepeat
+                          ? Colors.deepPurpleAccent
+                          : Colors.white,
                     ),
                   ),
                 ],
