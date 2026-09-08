@@ -1,4 +1,4 @@
-package com.sereng
+package Com.sereng
 
 import io.flutter.embedding.android.FlutterActivity
 
