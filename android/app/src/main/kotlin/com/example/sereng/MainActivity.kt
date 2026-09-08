@@ -1,5 +1,5 @@
-package com.example.sereng
+package com.sereng
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity: FlutterActivity()
