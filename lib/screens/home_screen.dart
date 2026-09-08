@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'search_screen.dart';
 import 'notifications_screen.dart';
-import 'recently_played_screen.dart';
 import 'music_player_screen.dart';
 import 'artist_profile_screen.dart';
 
