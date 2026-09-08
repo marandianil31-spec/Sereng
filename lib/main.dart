@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-import 'firebase_options.dart';
+import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/explore_screen.dart';
@@ -11,9 +9,7 @@ import 'screens/profile_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
 
   runApp(const SerengApp());
 }
@@ -25,12 +21,21 @@ class SerengApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
       title: 'SERENG',
 
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B0B0F),
+
+        scaffoldBackgroundColor:
+            const Color(0xFF0B0B0F),
+
         useMaterial3: true,
+
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7C3AED),
+          brightness: Brightness.dark,
+        ),
       ),
 
       home: const MainScreen(),
@@ -61,6 +66,7 @@ class _MainScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor:
           const Color(0xFF0B0B0F),
 
@@ -70,34 +76,50 @@ class _MainScreenState
       ),
 
       bottomNavigationBar: NavigationBar(
+
+        height: 80,
+
         backgroundColor:
             const Color(0xFF111116),
 
         selectedIndex: selectedIndex,
 
+        indicatorColor:
+            const Color(0xFF4A4458),
+
+        labelBehavior:
+            NavigationDestinationLabelBehavior.alwaysShow,
+
         onDestinationSelected: (index) {
+
           setState(() {
             selectedIndex = index;
           });
+
         },
 
         destinations: const [
-          NavigationDestination(
-            icon:
-                Icon(Icons.home_outlined),
 
-            selectedIcon:
-                Icon(Icons.home),
+          NavigationDestination(
+            icon: Icon(
+              Icons.home_outlined,
+            ),
+
+            selectedIcon: Icon(
+              Icons.home,
+            ),
 
             label: 'Home',
           ),
 
           NavigationDestination(
-            icon:
-                Icon(Icons.explore_outlined),
+            icon: Icon(
+              Icons.explore_outlined,
+            ),
 
-            selectedIcon:
-                Icon(Icons.explore),
+            selectedIcon: Icon(
+              Icons.explore,
+            ),
 
             label: 'Explore',
           ),
@@ -115,14 +137,17 @@ class _MainScreenState
           ),
 
           NavigationDestination(
-            icon:
-                Icon(Icons.person_outline),
+            icon: Icon(
+              Icons.person_outline,
+            ),
 
-            selectedIcon:
-                Icon(Icons.person),
+            selectedIcon: Icon(
+              Icons.person,
+            ),
 
             label: 'Profile',
           ),
+
         ],
       ),
     );
