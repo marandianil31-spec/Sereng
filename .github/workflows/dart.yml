@@ -29,17 +29,6 @@ jobs:
 
       - name: Check Firebase file
         run: |
-          echo "Checking Firebase configuration..."
-          pwd
-          echo "Android app files:"
-          ls -la android/app
-
-          if [ -f "android/app/google-services.json" ]; then
-            echo "google-services.json FOUND"
-          else
-            echo "google-services.json MISSING"
-            exit 1
-          fi
 
       - name: Build APK
         run: flutter build apk --release
