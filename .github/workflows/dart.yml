@@ -27,17 +27,18 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Check Firebase file
-        run: |
-
       - name: Build APK
         run: flutter build apk --release
+
+      - name: Get APK SHA Fingerprint
+        run: |
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk
 
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release create "v1.0.${{ github.run_number }}" \
-            build/app/outputs/flutter-apk/app-release.apk \
-            --title "SERENG v1.0.${{ github.run_number }}" \
-            --notes "SERENG Android APK"
+          build/app/outputs/flutter-apk/app-release.apk \
+          --title "SERENG v1.0.${{ github.run_number }}" \
+          --notes "SERENG Android APK"
