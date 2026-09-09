@@ -30,12 +30,11 @@ jobs:
       - name: Check Firebase file
         run: |
           echo "Checking Firebase configuration..."
-          echo "Current directory:"
           pwd
           echo "Android app files:"
           ls -la android/app
 
-          if [ -f android/app/google-services.json ]; then
+          if [ -f "android/app/google-services.json" ]; then
             echo "google-services.json FOUND"
           else
             echo "google-services.json MISSING"
@@ -47,7 +46,7 @@ jobs:
 
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release create "v1.0.${{ github.run_number }}" \
             build/app/outputs/flutter-apk/app-release.apk \
