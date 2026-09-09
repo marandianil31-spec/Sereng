@@ -12,28 +12,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # Checkout project
       - uses: actions/checkout@v4
 
+      # Setup Flutter
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
 
+      # Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
+      # Analyze project
       - name: Analyze
         run: flutter analyze
 
+      # Run tests
       - name: Run tests
         run: flutter test
 
+      # Build Release APK
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Get APK SHA Fingerprint
+      # Get Debug SHA-1 Fingerprint
+      - name: Get SHA-1 Fingerprint
         run: |
-          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk
+          keytool -list -v \
+          -keystore ~/.android/debug.keystore \
+          -alias androiddebugkey \
+          -storepass android \
+          -keypass android
 
+      # Create GitHub Release
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
