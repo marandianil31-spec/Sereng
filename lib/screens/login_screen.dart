@@ -854,4 +854,31 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
 
         prefixIcon:
-            Icon
+            Icon(
+            icon,
+
+          color:
+              Colors.white54,
+        ),
+
+        filled: true,
+
+        fillColor:
+            const Color(
+          0xFF18181F,
+        ),
+
+        border:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            15,
+          ),
+
+          borderSide:
+              BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
