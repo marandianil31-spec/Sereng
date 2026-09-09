@@ -11,54 +11,54 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isLogin = true;
-
   bool obscurePassword = true;
-
   bool isLoading = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final emailController = TextEditingController();
+  final TextEditingController emailController =
+      TextEditingController();
 
-  final passwordController = TextEditingController();
+  final TextEditingController passwordController =
+      TextEditingController();
 
-  final nameController = TextEditingController();
+  final TextEditingController nameController =
+      TextEditingController();
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     nameController.dispose();
-
     super.dispose();
   }
 
-  // ===============================
+  // =========================
   // EMAIL LOGIN / SIGNUP
-  // ===============================
+  // =========================
 
   Future<void> submit() async {
     final email = emailController.text.trim();
-
     final password = passwordController.text.trim();
-
     final name = nameController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       showMessage('Please enter email and password.');
+      return;
+    }
 
+    if (!email.contains('@')) {
+      showMessage('Please enter a valid email.');
       return;
     }
 
     if (!isLogin && name.isEmpty) {
       showMessage('Please enter your name.');
-
       return;
     }
 
     if (password.length < 6) {
       showMessage('Password must be at least 6 characters.');
-
       return;
     }
 
@@ -73,47 +73,51 @@ class _LoginScreenState extends State<LoginScreen> {
           email: email,
           password: password,
         );
+
+        if (mounted) {
+          showMessage('Login successful!');
+        }
       } else {
-        // CREATE ACCOUNT
-        final userCredential =
+        // SIGNUP
+        final UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
 
-        // SAVE USER NAME
-        if (name.isNotEmpty) {
-          await userCredential.user?.updateDisplayName(
-            name,
+        // SAVE NAME
+        if (name.isNotEmpty &&
+            userCredential.user != null) {
+          await userCredential.user!
+              .updateDisplayName(name);
+        }
+
+        if (mounted) {
+          showMessage(
+            'Account created successfully!',
           );
         }
       }
-
-      if (!mounted) return;
-
-      showMessage(
-        isLogin
-            ? 'Login successful!'
-            : 'Account created successfully!',
-      );
     } on FirebaseAuthException catch (e) {
       showFirebaseError(e);
     } catch (e) {
+      debugPrint('Auth Error: $e');
+
       showMessage(
         'Something went wrong. Please try again.',
       );
-    }
-
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  // ===============================
-  // GOOGLE LOGIN
-  // ===============================
+  // =========================
+  // GOOGLE SIGN IN
+  // =========================
 
   Future<void> signInWithGoogle() async {
     setState(() {
@@ -121,54 +125,71 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // GOOGLE SIGN IN
       final GoogleSignIn googleSignIn =
-          GoogleSignIn();
+          GoogleSignIn(
+        scopes: [
+          'email',
+        ],
+      );
 
+      // OPEN GOOGLE ACCOUNT SELECTOR
       final GoogleSignInAccount? googleUser =
           await googleSignIn.signIn();
 
+      // USER CANCELLED
       if (googleUser == null) {
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-
         return;
       }
 
+      // GET AUTH DETAILS
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final credential =
+      // CREATE FIREBASE CREDENTIAL
+      final AuthCredential credential =
           GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // LOGIN WITH FIREBASE
       await _auth.signInWithCredential(
         credential,
       );
+
+      if (mounted) {
+        showMessage(
+          'Google Sign-In successful!',
+        );
+      }
     } on FirebaseAuthException catch (e) {
+      debugPrint(
+        'Firebase Google Sign-In Error: '
+        '${e.code} - ${e.message}',
+      );
+
       showFirebaseError(e);
     } catch (e) {
+      debugPrint(
+        'Google Sign-In Error: $e',
+      );
+
       showMessage(
         'Google Sign-In failed. Please try again.',
       );
-
-      debugPrint(e.toString());
-    }
-
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  // ===============================
+  // =========================
   // FORGOT PASSWORD
-  // ===============================
+  // =========================
 
   Future<void> forgotPassword() async {
     final email = emailController.text.trim();
@@ -177,7 +198,6 @@ class _LoginScreenState extends State<LoginScreen> {
       showMessage(
         'Please enter your email first.',
       );
-
       return;
     }
 
@@ -191,16 +211,25 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } on FirebaseAuthException catch (e) {
       showFirebaseError(e);
+    } catch (e) {
+      showMessage(
+        'Something went wrong.',
+      );
     }
   }
 
-  // ===============================
-  // FIREBASE ERROR
-  // ===============================
+  // =========================
+  // FIREBASE ERROR HANDLER
+  // =========================
 
   void showFirebaseError(
     FirebaseAuthException e,
   ) {
+    debugPrint(
+      'Firebase Error: '
+      '${e.code} - ${e.message}',
+    );
+
     String message = 'Authentication failed.';
 
     switch (e.code) {
@@ -209,7 +238,8 @@ class _LoginScreenState extends State<LoginScreen> {
         break;
 
       case 'user-not-found':
-        message = 'No account found with this email.';
+        message =
+            'No account found with this email.';
         break;
 
       case 'wrong-password':
@@ -217,42 +247,70 @@ class _LoginScreenState extends State<LoginScreen> {
         break;
 
       case 'invalid-credential':
-        message = 'Invalid email or password.';
+        message =
+            'Invalid email or password.';
         break;
 
       case 'email-already-in-use':
-        message = 'This email is already registered.';
+        message =
+            'This email is already registered.';
         break;
 
       case 'weak-password':
-        message = 'Password is too weak.';
+        message =
+            'Password is too weak.';
         break;
 
       case 'network-request-failed':
-        message = 'Check your internet connection.';
+        message =
+            'Check your internet connection.';
         break;
+
+      case 'operation-not-allowed':
+        message =
+            'This sign-in method is not enabled in Firebase.';
+        break;
+
+      case 'account-exists-with-different-credential':
+        message =
+            'An account already exists with this email.';
+        break;
+
+      case 'user-disabled':
+        message =
+            'This user account has been disabled.';
+        break;
+
+      default:
+        message =
+            e.message ??
+            'Authentication failed.';
     }
 
     showMessage(message);
   }
 
-  // ===============================
-  // MESSAGE
-  // ===============================
+  // =========================
+  // SHOW MESSAGE
+  // =========================
 
   void showMessage(String message) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context)
+        .hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       SnackBar(
         content: Text(message),
       ),
     );
   }
 
-  // ===============================
+  // =========================
   // UI
-  // ===============================
+  // =========================
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 CrossAxisAlignment.start,
 
             children: [
+
               // LOGO
 
               Center(
@@ -282,9 +341,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 78,
                   height: 78,
 
-                  decoration: BoxDecoration(
+                  decoration:
+                      BoxDecoration(
                     borderRadius:
-                        BorderRadius.circular(24),
+                        BorderRadius.circular(
+                      24,
+                    ),
 
                     gradient:
                         const LinearGradient(
@@ -317,6 +379,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   style:
                       const TextStyle(
+                    color: Colors.white,
                     fontSize: 30,
                     fontWeight:
                         FontWeight.bold,
@@ -355,7 +418,9 @@ class _LoginScreenState extends State<LoginScreen> {
               if (!isLogin) ...[
                 const Text(
                   'Name',
+
                   style: TextStyle(
+                    color: Colors.white,
                     fontWeight:
                         FontWeight.w600,
                   ),
@@ -387,6 +452,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Email',
 
                 style: TextStyle(
+                  color: Colors.white,
                   fontWeight:
                       FontWeight.w600,
                 ),
@@ -420,6 +486,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Password',
 
                 style: TextStyle(
+                  color: Colors.white,
                   fontWeight:
                       FontWeight.w600,
                 ),
@@ -528,7 +595,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 5,
               ),
 
-              // LOGIN BUTTON
+              // LOGIN / SIGNUP BUTTON
 
               SizedBox(
                 width:
@@ -615,11 +682,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       horizontal: 12,
                     ),
 
-                    child: Text(
+                    child: const Text(
                       'OR',
 
                       style:
-                          const TextStyle(
+                          TextStyle(
                         color:
                             Colors.white38,
 
@@ -751,9 +818,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ===============================
+  // =========================
   // INPUT FIELD
-  // ===============================
+  // =========================
 
   Widget inputField({
     required TextEditingController
@@ -767,22 +834,18 @@ class _LoginScreenState extends State<LoginScreen> {
         keyboardType,
   }) {
     return TextField(
-      controller:
-          controller,
+      controller: controller,
 
-      keyboardType:
-          keyboardType,
+      keyboardType: keyboardType,
 
       style:
           const TextStyle(
-        color:
-            Colors.white,
+        color: Colors.white,
       ),
 
       decoration:
           InputDecoration(
-        hintText:
-            hint,
+        hintText: hint,
 
         hintStyle:
             const TextStyle(
@@ -791,31 +854,4 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
 
         prefixIcon:
-            Icon(
-          icon,
-
-          color:
-              Colors.white54,
-        ),
-
-        filled: true,
-
-        fillColor:
-            const Color(
-          0xFF18181F,
-        ),
-
-        border:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            15,
-          ),
-
-          borderSide:
-              BorderSide.none,
-        ),
-      ),
-    );
-  }
-}
+            Icon
