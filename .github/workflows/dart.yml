@@ -1,65 +1,40 @@
-name: Flutter CI
+name: Create SERENG Keystore
 
 on:
-  push:
-    branches: [main]
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
-  build:
+  create-keystore:
     runs-on: ubuntu-latest
 
     steps:
 
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      # Create Debug Keystore
-      - name: Create Debug Keystore
+      # Create permanent release keystore
+      - name: Create Release Keystore
         run: |
-          mkdir -p ~/.android
-
-          keytool -genkeypair \
-            -keystore ~/.android/debug.keystore \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
+          keytool -genkeypair -v \
+            -keystore sereng-release.jks \
+            -alias sereng \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+            -storepass SerengStore12345 \
+            -keypass SerengKey12345 \
+            -dname "CN=SERENG, OU=SERENG, O=SERENG, L=Giridih, ST=Jharkhand, C=IN"
 
-      # Get SHA-1 Fingerprint
-      - name: Get SHA-1 Fingerprint
+      # Show SHA-1 and SHA-256
+      - name: Show SHA Fingerprints
         run: |
           keytool -list -v \
-            -keystore ~/.android/debug.keystore \
-            -alias androiddebugkey \
-            -storepass android \
-            -keypass android
+            -keystore sereng-release.jks \
+            -alias sereng \
+            -storepass SerengStore12345 \
+            -keypass SerengKey12345
 
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "v1.0.${{ github.run_number }}" \
-          build/app/outputs/flutter-apk/app-release.apk \
-          --title "SERENG v1.0.${{ github.run_number }}" \
-          --notes "SERENG Android APK"
+      # Upload keystore as artifact
+      - name: Upload Release Keystore
+        uses: actions/upload-artifact@v4
+        with:
+          name: sereng-release-keystore
+          path: sereng-release.jks
+          retention-days: 30
