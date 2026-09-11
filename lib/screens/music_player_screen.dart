@@ -14,7 +14,11 @@ class MusicPlayerScreen extends StatefulWidget {
     super.key,
     required this.songTitle,
     required this.artistName,
-    required this.audioUrl,
+
+    // IMPORTANT:
+    // audioUrl optional rakha gaya hai.
+    // Isse dusre screens me build error nahi aayega.
+    this.audioUrl = '',
   });
 
   @override
@@ -130,21 +134,16 @@ class _MusicPlayerScreenState
     int nextIndex;
 
     if (isShuffle) {
-      nextIndex = Random().nextInt(
-        songs.length,
-      );
+      nextIndex = Random().nextInt(songs.length);
 
-      while (nextIndex ==
-          currentSongIndex) {
+      while (nextIndex == currentSongIndex) {
         nextIndex = Random().nextInt(
           songs.length,
         );
       }
     } else {
-      if (currentSongIndex <
-          songs.length - 1) {
-        nextIndex =
-            currentSongIndex + 1;
+      if (currentSongIndex < songs.length - 1) {
+        nextIndex = currentSongIndex + 1;
       } else {
         nextIndex = 0;
       }
@@ -159,14 +158,10 @@ class _MusicPlayerScreenState
         await _audioService.pause();
       } else {
         final currentUrl =
-            songs[currentSongIndex]
-                    ['audioUrl'] ??
-                '';
+            songs[currentSongIndex]['audioUrl'] ?? '';
 
         if (currentUrl.isEmpty) {
-          debugPrint(
-            'No audio URL available',
-          );
+          debugPrint('No audio URL available');
           return;
         }
 
@@ -177,33 +172,22 @@ class _MusicPlayerScreenState
     }
   }
 
-  String formatDuration(
-    Duration duration,
-  ) {
+  String formatDuration(Duration duration) {
     String twoDigits(int n) =>
-        n.toString().padLeft(
-          2,
-          '0',
-        );
+        n.toString().padLeft(2, '0');
 
-    final minutes =
-        duration.inMinutes;
+    final minutes = duration.inMinutes;
 
     final seconds =
-        duration.inSeconds.remainder(
-      60,
-    );
+        duration.inSeconds.remainder(60);
 
     return '$minutes:${twoDigits(seconds)}';
   }
 
   @override
   void dispose() {
-    // IMPORTANT:
-    // Player ko yahan dispose nahi karenge.
-    // Ye common AudioPlayerService hai,
-    // isliye music screen close hone par
-    // music continue kar sakta hai.
+    // Player dispose nahi karenge.
+    // AudioPlayerService common player use kar raha hai.
 
     super.dispose();
   }
@@ -232,7 +216,6 @@ class _MusicPlayerScreenState
                     onPressed: () {
                       Navigator.pop(context);
                     },
-
                     icon: const Icon(
                       Icons
                           .keyboard_arrow_down_rounded,
@@ -243,13 +226,10 @@ class _MusicPlayerScreenState
                   const Expanded(
                     child: Text(
                       'Now Playing',
-
                       textAlign:
                           TextAlign.center,
-
                       style: TextStyle(
                         fontSize: 26,
-
                         fontWeight:
                             FontWeight.bold,
                       ),
@@ -268,53 +248,42 @@ class _MusicPlayerScreenState
 
               AspectRatio(
                 aspectRatio: 1,
-
                 child: Container(
                   width:
                       double.infinity,
-
                   decoration:
                       BoxDecoration(
                     borderRadius:
                         BorderRadius.circular(
                       28,
                     ),
-
                     gradient:
                         const LinearGradient(
                       begin:
                           Alignment.topLeft,
-
                       end:
                           Alignment.bottomRight,
-
                       colors: [
                         Color(0xFF7C3AED),
                         Color(0xFF2563EB),
                       ],
                     ),
-
                     boxShadow: const [
                       BoxShadow(
                         color:
                             Colors.black45,
-
                         blurRadius: 25,
-
                         offset:
                             Offset(0, 12),
                       ),
                     ],
                   ),
-
                   child:
                       const Center(
                     child: Icon(
                       Icons
                           .music_note_rounded,
-
                       size: 120,
-
                       color:
                           Colors.white70,
                     ),
@@ -335,23 +304,18 @@ class _MusicPlayerScreenState
                       crossAxisAlignment:
                           CrossAxisAlignment
                               .start,
-
                       children: [
                         Text(
                           currentSong[
                                   'title'] ??
                               'Unknown Song',
-
                           maxLines: 1,
-
                           overflow:
                               TextOverflow
                                   .ellipsis,
-
                           style:
                               const TextStyle(
                             fontSize: 28,
-
                             fontWeight:
                                 FontWeight
                                     .bold,
@@ -366,11 +330,9 @@ class _MusicPlayerScreenState
                           currentSong[
                                   'artist'] ??
                               'Unknown Artist',
-
                           style:
                               const TextStyle(
                             fontSize: 17,
-
                             color:
                                 Colors.white54,
                           ),
@@ -386,15 +348,12 @@ class _MusicPlayerScreenState
                             !isFavorite;
                       });
                     },
-
                     icon: Icon(
                       isFavorite
                           ? Icons.favorite
                           : Icons
                               .favorite_border,
-
                       size: 34,
-
                       color: isFavorite
                           ? Colors.redAccent
                           : Colors.white,
@@ -412,22 +371,19 @@ class _MusicPlayerScreenState
               StreamBuilder<Duration?>(
                 stream:
                     _player.durationStream,
-
                 builder:
                     (
                   context,
                   durationSnapshot,
                 ) {
                   final duration =
-                      durationSnapshot
-                              .data ??
+                      durationSnapshot.data ??
                           Duration.zero;
 
                   return StreamBuilder<
                       Duration>(
                     stream:
                         _player.positionStream,
-
                     builder:
                         (
                       context,
@@ -450,9 +406,7 @@ class _MusicPlayerScreenState
                             value: position
                                 .inMilliseconds
                                 .toDouble(),
-
                             min: 0,
-
                             max: duration
                                         .inMilliseconds >
                                     0
@@ -460,13 +414,10 @@ class _MusicPlayerScreenState
                                     .inMilliseconds
                                     .toDouble()
                                 : 1,
-
                             activeColor:
                                 Colors.white,
-
                             inactiveColor:
                                 Colors.white24,
-
                             onChanged:
                                 (value) {
                               _audioService
@@ -486,23 +437,19 @@ class _MusicPlayerScreenState
                                     .symmetric(
                               horizontal: 12,
                             ),
-
                             child: Row(
                               mainAxisAlignment:
                                   MainAxisAlignment
                                       .spaceBetween,
-
                               children: [
                                 Text(
                                   formatDuration(
                                     position,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
                                         Colors.white54,
-
                                     fontSize: 14,
                                   ),
                                 ),
@@ -511,12 +458,10 @@ class _MusicPlayerScreenState
                                   formatDuration(
                                     duration,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
                                         Colors.white54,
-
                                     fontSize: 14,
                                   ),
                                 ),
@@ -540,7 +485,6 @@ class _MusicPlayerScreenState
                 mainAxisAlignment:
                     MainAxisAlignment
                         .spaceEvenly,
-
                 children: [
                   // SHUFFLE
 
@@ -551,12 +495,9 @@ class _MusicPlayerScreenState
                             !isShuffle;
                       });
                     },
-
                     icon: Icon(
                       Icons.shuffle_rounded,
-
                       size: 30,
-
                       color: isShuffle
                           ? Colors
                               .deepPurpleAccent
@@ -569,11 +510,9 @@ class _MusicPlayerScreenState
                   IconButton(
                     onPressed:
                         previousSong,
-
                     icon: const Icon(
                       Icons
                           .skip_previous_rounded,
-
                       size: 42,
                     ),
                   ),
@@ -583,7 +522,6 @@ class _MusicPlayerScreenState
                   StreamBuilder<bool>(
                     stream:
                         _player.playingStream,
-
                     builder:
                         (
                       context,
@@ -596,30 +534,23 @@ class _MusicPlayerScreenState
                       return GestureDetector(
                         onTap:
                             togglePlay,
-
                         child: Container(
                           width: 88,
-
                           height: 88,
-
                           decoration:
                               const BoxDecoration(
                             shape:
                                 BoxShape.circle,
-
                             color:
                                 Colors.white,
                           ),
-
                           child: Icon(
                             isPlaying
                                 ? Icons
                                     .pause_rounded
                                 : Icons
                                     .play_arrow_rounded,
-
                             size: 55,
-
                             color:
                                 Colors.black,
                           ),
@@ -633,11 +564,9 @@ class _MusicPlayerScreenState
                   IconButton(
                     onPressed:
                         nextSong,
-
                     icon: const Icon(
                       Icons
                           .skip_next_rounded,
-
                       size: 42,
                     ),
                   ),
@@ -651,12 +580,9 @@ class _MusicPlayerScreenState
                             !isRepeat;
                       });
                     },
-
                     icon: Icon(
                       Icons.repeat_rounded,
-
                       size: 30,
-
                       color: isRepeat
                           ? Colors
                               .deepPurpleAccent
