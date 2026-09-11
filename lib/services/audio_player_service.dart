@@ -1,12 +1,29 @@
 import 'package:just_audio/just_audio.dart';
 
 class AudioPlayerService {
+  AudioPlayerService._internal();
+
+  static final AudioPlayerService _instance =
+      AudioPlayerService._internal();
+
+  factory AudioPlayerService() {
+    return _instance;
+  }
+
   final AudioPlayer _player = AudioPlayer();
 
   AudioPlayer get player => _player;
 
+  String? currentUrl;
+
   Future<void> play(String url) async {
-    await _player.setUrl(url);
+    // Same song already loaded hai
+    if (currentUrl != url) {
+      currentUrl = url;
+
+      await _player.setUrl(url);
+    }
+
     await _player.play();
   }
 
@@ -20,6 +37,7 @@ class AudioPlayerService {
 
   Future<void> stop() async {
     await _player.stop();
+    currentUrl = null;
   }
 
   Future<void> seek(Duration position) async {
