@@ -16,32 +16,39 @@ class AlbumDetailScreen extends StatelessWidget {
     {
       'title': 'Dular Re',
       'duration': '3:42',
+      'audioUrl': '',
     },
     {
       'title': 'Baha Bonga',
       'duration': '4:05',
+      'audioUrl': '',
     },
     {
       'title': 'Amge Mon',
       'duration': '3:51',
+      'audioUrl': '',
     },
     {
       'title': 'Johar Re',
       'duration': '4:12',
+      'audioUrl': '',
     },
     {
       'title': 'Sari Sari',
       'duration': '3:36',
+      'audioUrl': '',
     },
     {
       'title': 'Dular Gate',
       'duration': '4:20',
+      'audioUrl': '',
     },
   ];
 
   void openPlayer(
     BuildContext context,
     String title,
+    String audioUrl,
   ) {
     Navigator.push(
       context,
@@ -49,6 +56,7 @@ class AlbumDetailScreen extends StatelessWidget {
         builder: (_) => MusicPlayerScreen(
           songTitle: title,
           artistName: artistName,
+          audioUrl: audioUrl,
         ),
       ),
     );
@@ -71,8 +79,10 @@ class AlbumDetailScreen extends StatelessWidget {
         children: [
           Container(
             height: 220,
+
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
+
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF7C3AED),
@@ -93,6 +103,7 @@ class AlbumDetailScreen extends StatelessWidget {
           Text(
             albumName,
             textAlign: TextAlign.center,
+
             style: const TextStyle(
               fontSize: 27,
               fontWeight: FontWeight.bold,
@@ -104,6 +115,7 @@ class AlbumDetailScreen extends StatelessWidget {
           Text(
             artistName,
             textAlign: TextAlign.center,
+
             style: const TextStyle(
               color: Colors.white54,
             ),
@@ -113,6 +125,7 @@ class AlbumDetailScreen extends StatelessWidget {
 
           const Text(
             'Songs',
+
             style: TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
@@ -140,18 +153,19 @@ class AlbumDetailScreen extends StatelessWidget {
               ),
 
               title: Text(
-                song['title']!,
+                song['title'] ?? 'Unknown Song',
               ),
 
               subtitle: Text(
-                song['duration']!,
+                song['duration'] ?? '',
               ),
 
               trailing: IconButton(
                 onPressed: () {
                   openPlayer(
                     context,
-                    song['title']!,
+                    song['title'] ?? 'Unknown Song',
+                    song['audioUrl'] ?? '',
                   );
                 },
 
@@ -160,6 +174,14 @@ class AlbumDetailScreen extends StatelessWidget {
                   size: 32,
                 ),
               ),
+
+              onTap: () {
+                openPlayer(
+                  context,
+                  song['title'] ?? 'Unknown Song',
+                  song['audioUrl'] ?? '',
+                );
+              },
             ),
           ),
         ],
