@@ -1,22 +1,16 @@
 import 'package:just_audio/just_audio.dart';
 
 class AudioPlayerService {
-  AudioPlayerService._privateConstructor();
+  AudioPlayerService._internal();
 
-  static final AudioPlayerService _instance =
-      AudioPlayerService._privateConstructor();
-
-  factory AudioPlayerService() {
-    return _instance;
-  }
+  static final AudioPlayerService instance =
+      AudioPlayerService._internal();
 
   final AudioPlayer _player = AudioPlayer();
 
   AudioPlayer get player => _player;
 
   Future<void> play(String url) async {
-    if (url.isEmpty) return;
-
     await _player.setUrl(url);
     await _player.play();
   }
