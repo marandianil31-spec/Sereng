@@ -24,7 +24,6 @@ class MusicPlayerScreen extends StatefulWidget {
 
 class _MusicPlayerScreenState
     extends State<MusicPlayerScreen> {
-
   // Singleton AudioPlayerService
   final AudioPlayerService _audioService =
       AudioPlayerService.instance;
@@ -56,6 +55,7 @@ class _MusicPlayerScreenState
     _listenToSongCompletion();
   }
 
+  // LOAD SONG
   Future<void> _loadSong() async {
     try {
       if (widget.audioUrl.isEmpty) {
@@ -63,17 +63,23 @@ class _MusicPlayerScreenState
         return;
       }
 
-      await _audioService.play(widget.audioUrl);
+      // Song information service me save hogi
+      // Isse Mini Player current song dikha sakega
+      await _audioService.playSong(
+        title: widget.songTitle,
+        artist: widget.artistName,
+        url: widget.audioUrl,
+      );
     } catch (e) {
       debugPrint('Song load error: $e');
     }
   }
 
+  // SONG COMPLETION
   void _listenToSongCompletion() {
     _player.playerStateStream.listen((state) {
       if (state.processingState ==
           ProcessingState.completed) {
-
         if (isRepeat) {
           _player.seek(Duration.zero);
           _player.play();
@@ -84,6 +90,7 @@ class _MusicPlayerScreenState
     });
   }
 
+  // CHANGE SONG
   Future<void> _changeSong(int index) async {
     if (songs.isEmpty) return;
 
@@ -101,12 +108,21 @@ class _MusicPlayerScreenState
     }
 
     try {
-      await _audioService.play(audioUrl);
+      await _audioService.playSong(
+        title:
+            songs[index]['title'] ??
+                'Unknown Song',
+        artist:
+            songs[index]['artist'] ??
+                'Unknown Artist',
+        url: audioUrl,
+      );
     } catch (e) {
       debugPrint('Change song error: $e');
     }
   }
 
+  // PREVIOUS SONG
   void previousSong() {
     if (songs.length <= 1) {
       _audioService.seek(Duration.zero);
@@ -124,6 +140,7 @@ class _MusicPlayerScreenState
     _changeSong(previousIndex);
   }
 
+  // NEXT SONG
   void nextSong() {
     if (songs.length <= 1) {
       _audioService.seek(Duration.zero);
@@ -156,6 +173,7 @@ class _MusicPlayerScreenState
     _changeSong(nextIndex);
   }
 
+  // PLAY / PAUSE
   Future<void> togglePlay() async {
     try {
       if (_player.playing) {
@@ -180,6 +198,7 @@ class _MusicPlayerScreenState
     }
   }
 
+  // FORMAT TIME
   String formatDuration(
     Duration duration,
   ) {
@@ -197,8 +216,8 @@ class _MusicPlayerScreenState
 
   @override
   void dispose() {
-    // AudioPlayerService common player use kar raha hai.
-    // Screen close hone par music continue kar sakta hai.
+    // Common player dispose nahi karenge,
+    // taki screen close hone par music continue rahe.
 
     super.dispose();
   }
@@ -219,8 +238,8 @@ class _MusicPlayerScreenState
 
           child: Column(
             children: [
-
               // TOP BAR
+
               Row(
                 children: [
                   IconButton(
@@ -228,7 +247,8 @@ class _MusicPlayerScreenState
                       Navigator.pop(context);
                     },
                     icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
+                      Icons
+                          .keyboard_arrow_down_rounded,
                       size: 32,
                     ),
                   ),
@@ -236,7 +256,8 @@ class _MusicPlayerScreenState
                   const Expanded(
                     child: Text(
                       'Now Playing',
-                      textAlign: TextAlign.center,
+                      textAlign:
+                          TextAlign.center,
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight:
@@ -254,24 +275,27 @@ class _MusicPlayerScreenState
               const Spacer(),
 
               // ALBUM COVER
+
               AspectRatio(
                 aspectRatio: 1,
 
                 child: Container(
-                  width: double.infinity,
+                  width:
+                      double.infinity,
 
-                  decoration: BoxDecoration(
+                  decoration:
+                      BoxDecoration(
                     borderRadius:
-                        BorderRadius.circular(28),
+                        BorderRadius.circular(
+                      28,
+                    ),
 
                     gradient:
                         const LinearGradient(
                       begin:
                           Alignment.topLeft,
-
                       end:
                           Alignment.bottomRight,
-
                       colors: [
                         Color(0xFF7C3AED),
                         Color(0xFF2563EB),
@@ -289,9 +313,11 @@ class _MusicPlayerScreenState
                     ],
                   ),
 
-                  child: const Center(
+                  child:
+                      const Center(
                     child: Icon(
-                      Icons.music_note_rounded,
+                      Icons
+                          .music_note_rounded,
                       size: 120,
                       color:
                           Colors.white70,
@@ -305,30 +331,33 @@ class _MusicPlayerScreenState
               ),
 
               // SONG DETAILS
+
               Row(
                 children: [
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          CrossAxisAlignment
+                              .start,
 
                       children: [
-
                         Text(
-                          currentSong['title'] ??
+                          currentSong[
+                                  'title'] ??
                               'Unknown Song',
 
                           maxLines: 1,
 
                           overflow:
-                              TextOverflow.ellipsis,
+                              TextOverflow
+                                  .ellipsis,
 
                           style:
                               const TextStyle(
                             fontSize: 28,
                             fontWeight:
-                                FontWeight.bold,
+                                FontWeight
+                                    .bold,
                           ),
                         ),
 
@@ -337,7 +366,8 @@ class _MusicPlayerScreenState
                         ),
 
                         Text(
-                          currentSong['artist'] ??
+                          currentSong[
+                                  'artist'] ??
                               'Unknown Artist',
 
                           style:
@@ -362,7 +392,8 @@ class _MusicPlayerScreenState
                     icon: Icon(
                       isFavorite
                           ? Icons.favorite
-                          : Icons.favorite_border,
+                          : Icons
+                              .favorite_border,
 
                       size: 34,
 
@@ -379,6 +410,7 @@ class _MusicPlayerScreenState
               ),
 
               // PROGRESS BAR
+
               StreamBuilder<Duration?>(
                 stream:
                     _player.durationStream,
@@ -387,12 +419,12 @@ class _MusicPlayerScreenState
                   context,
                   durationSnapshot,
                 ) {
-
                   final duration =
                       durationSnapshot.data ??
                           Duration.zero;
 
-                  return StreamBuilder<Duration>(
+                  return StreamBuilder<
+                      Duration>(
                     stream:
                         _player.positionStream,
 
@@ -400,7 +432,6 @@ class _MusicPlayerScreenState
                       context,
                       positionSnapshot,
                     ) {
-
                       var position =
                           positionSnapshot.data ??
                               Duration.zero;
@@ -413,7 +444,6 @@ class _MusicPlayerScreenState
 
                       return Column(
                         children: [
-
                           Slider(
                             value: position
                                 .inMilliseconds
@@ -437,10 +467,12 @@ class _MusicPlayerScreenState
 
                             onChanged:
                                 (value) {
-                              _audioService.seek(
+                              _audioService
+                                  .seek(
                                 Duration(
                                   milliseconds:
-                                      value.round(),
+                                      value
+                                          .round(),
                                 ),
                               );
                             },
@@ -448,7 +480,8 @@ class _MusicPlayerScreenState
 
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(
+                                const EdgeInsets
+                                    .symmetric(
                               horizontal: 12,
                             ),
 
@@ -458,7 +491,6 @@ class _MusicPlayerScreenState
                                       .spaceBetween,
 
                               children: [
-
                                 Text(
                                   formatDuration(
                                     position,
@@ -499,14 +531,15 @@ class _MusicPlayerScreenState
               ),
 
               // MUSIC CONTROLS
+
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment
                         .spaceEvenly,
 
                 children: [
-
                   // SHUFFLE
+
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -528,17 +561,20 @@ class _MusicPlayerScreenState
                   ),
 
                   // PREVIOUS
+
                   IconButton(
                     onPressed:
                         previousSong,
 
                     icon: const Icon(
-                      Icons.skip_previous_rounded,
+                      Icons
+                          .skip_previous_rounded,
                       size: 42,
                     ),
                   ),
 
                   // PLAY / PAUSE
+
                   StreamBuilder<bool>(
                     stream:
                         _player.playingStream,
@@ -547,7 +583,6 @@ class _MusicPlayerScreenState
                       context,
                       snapshot,
                     ) {
-
                       final isPlaying =
                           snapshot.data ??
                               false;
@@ -570,8 +605,10 @@ class _MusicPlayerScreenState
 
                           child: Icon(
                             isPlaying
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
+                                ? Icons
+                                    .pause_rounded
+                                : Icons
+                                    .play_arrow_rounded,
 
                             size: 55,
 
@@ -584,17 +621,20 @@ class _MusicPlayerScreenState
                   ),
 
                   // NEXT
+
                   IconButton(
                     onPressed:
                         nextSong,
 
                     icon: const Icon(
-                      Icons.skip_next_rounded,
+                      Icons
+                          .skip_next_rounded,
                       size: 42,
                     ),
                   ),
 
                   // REPEAT
+
                   IconButton(
                     onPressed: () {
                       setState(() {
