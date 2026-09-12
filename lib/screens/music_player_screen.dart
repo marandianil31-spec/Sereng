@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -24,7 +25,6 @@ class MusicPlayerScreen extends StatefulWidget {
 
 class _MusicPlayerScreenState
     extends State<MusicPlayerScreen> {
-  // Singleton AudioPlayerService
   final AudioPlayerService _audioService =
       AudioPlayerService.instance;
 
@@ -38,6 +38,9 @@ class _MusicPlayerScreenState
   int currentSongIndex = 0;
 
   late List<Map<String, String>> songs;
+
+  StreamSubscription<PlayerState>?
+      _playerStateSubscription;
 
   @override
   void initState() {
@@ -55,7 +58,6 @@ class _MusicPlayerScreenState
     _listenToSongCompletion();
   }
 
-  // LOAD SONG
   Future<void> _loadSong() async {
     try {
       if (widget.audioUrl.isEmpty) {
@@ -63,36 +65,42 @@ class _MusicPlayerScreenState
         return;
       }
 
-      // Song information service me save hogi
-      // Isse Mini Player current song dikha sakega
-      await _audioService.playSong(
-        title: widget.songTitle,
-        artist: widget.artistName,
-        url: widget.audioUrl,
+      await _audioService.play(
+        widget.audioUrl,
       );
     } catch (e) {
-      debugPrint('Song load error: $e');
+      debugPrint(
+        'Song load error: $e',
+      );
     }
   }
 
-  // SONG COMPLETION
   void _listenToSongCompletion() {
-    _player.playerStateStream.listen((state) {
-      if (state.processingState ==
-          ProcessingState.completed) {
-        if (isRepeat) {
-          _player.seek(Duration.zero);
-          _player.play();
-        } else {
-          nextSong();
+    _playerStateSubscription =
+        _player.playerStateStream.listen(
+      (state) {
+        if (state.processingState ==
+            ProcessingState.completed) {
+          if (isRepeat) {
+            _audioService.seek(
+              Duration.zero,
+            );
+
+            _audioService.resume();
+          } else {
+            nextSong();
+          }
         }
-      }
-    });
+      },
+    );
   }
 
-  // CHANGE SONG
-  Future<void> _changeSong(int index) async {
-    if (songs.isEmpty) return;
+  Future<void> _changeSong(
+    int index,
+  ) async {
+    if (songs.isEmpty) {
+      return;
+    }
 
     setState(() {
       currentSongIndex = index;
@@ -108,42 +116,44 @@ class _MusicPlayerScreenState
     }
 
     try {
-      await _audioService.playSong(
-        title:
-            songs[index]['title'] ??
-                'Unknown Song',
-        artist:
-            songs[index]['artist'] ??
-                'Unknown Artist',
-        url: audioUrl,
+      await _audioService.play(
+        audioUrl,
       );
     } catch (e) {
-      debugPrint('Change song error: $e');
+      debugPrint(
+        'Change song error: $e',
+      );
     }
   }
 
-  // PREVIOUS SONG
-  void previousSong() {
+  Future<void> previousSong() async {
     if (songs.length <= 1) {
-      _audioService.seek(Duration.zero);
+      await _audioService.seek(
+        Duration.zero,
+      );
       return;
     }
 
     int previousIndex;
 
     if (currentSongIndex > 0) {
-      previousIndex = currentSongIndex - 1;
+      previousIndex =
+          currentSongIndex - 1;
     } else {
-      previousIndex = songs.length - 1;
+      previousIndex =
+          songs.length - 1;
     }
 
-    _changeSong(previousIndex);
+    await _changeSong(
+      previousIndex,
+    );
   }
 
-  // NEXT SONG
-  void nextSong() {
+  Future<void> nextSong() async {
     if (songs.length <= 1) {
-      _audioService.seek(Duration.zero);
+      await _audioService.seek(
+        Duration.zero,
+      );
       return;
     }
 
@@ -170,10 +180,11 @@ class _MusicPlayerScreenState
       }
     }
 
-    _changeSong(nextIndex);
+    await _changeSong(
+      nextIndex,
+    );
   }
 
-  // PLAY / PAUSE
   Future<void> togglePlay() async {
     try {
       if (_player.playing) {
@@ -194,36 +205,47 @@ class _MusicPlayerScreenState
         await _audioService.resume();
       }
     } catch (e) {
-      debugPrint('Play error: $e');
+      debugPrint(
+        'Play error: $e',
+      );
     }
   }
 
-  // FORMAT TIME
   String formatDuration(
     Duration duration,
   ) {
-    String twoDigits(int n) =>
-        n.toString().padLeft(2, '0');
+    String twoDigits(int n) {
+      return n.toString().padLeft(
+        2,
+        '0',
+      );
+    }
 
     final minutes =
         duration.inMinutes;
 
     final seconds =
-        duration.inSeconds.remainder(60);
+        duration.inSeconds.remainder(
+      60,
+    );
 
     return '$minutes:${twoDigits(seconds)}';
   }
 
   @override
   void dispose() {
-    // Common player dispose nahi karenge,
-    // taki screen close hone par music continue rahe.
+    _playerStateSubscription?.cancel();
+
+    // Global AudioPlayer dispose nahi karenge.
+    // Screen close hone ke baad bhi music continue ho sakta hai.
 
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     final currentSong =
         songs[currentSongIndex];
 
@@ -278,18 +300,15 @@ class _MusicPlayerScreenState
 
               AspectRatio(
                 aspectRatio: 1,
-
                 child: Container(
                   width:
                       double.infinity,
-
                   decoration:
                       BoxDecoration(
                     borderRadius:
                         BorderRadius.circular(
                       28,
                     ),
-
                     gradient:
                         const LinearGradient(
                       begin:
@@ -301,7 +320,6 @@ class _MusicPlayerScreenState
                         Color(0xFF2563EB),
                       ],
                     ),
-
                     boxShadow: const [
                       BoxShadow(
                         color:
@@ -312,9 +330,7 @@ class _MusicPlayerScreenState
                       ),
                     ],
                   ),
-
-                  child:
-                      const Center(
+                  child: const Center(
                     child: Icon(
                       Icons
                           .music_note_rounded,
@@ -339,25 +355,19 @@ class _MusicPlayerScreenState
                       crossAxisAlignment:
                           CrossAxisAlignment
                               .start,
-
                       children: [
                         Text(
-                          currentSong[
-                                  'title'] ??
+                          currentSong['title'] ??
                               'Unknown Song',
-
                           maxLines: 1,
-
                           overflow:
                               TextOverflow
                                   .ellipsis,
-
                           style:
                               const TextStyle(
                             fontSize: 28,
                             fontWeight:
-                                FontWeight
-                                    .bold,
+                                FontWeight.bold,
                           ),
                         ),
 
@@ -366,10 +376,8 @@ class _MusicPlayerScreenState
                         ),
 
                         Text(
-                          currentSong[
-                                  'artist'] ??
+                          currentSong['artist'] ??
                               'Unknown Artist',
-
                           style:
                               const TextStyle(
                             fontSize: 17,
@@ -388,15 +396,12 @@ class _MusicPlayerScreenState
                             !isFavorite;
                       });
                     },
-
                     icon: Icon(
                       isFavorite
                           ? Icons.favorite
                           : Icons
                               .favorite_border,
-
                       size: 34,
-
                       color: isFavorite
                           ? Colors.redAccent
                           : Colors.white,
@@ -414,7 +419,6 @@ class _MusicPlayerScreenState
               StreamBuilder<Duration?>(
                 stream:
                     _player.durationStream,
-
                 builder: (
                   context,
                   durationSnapshot,
@@ -427,7 +431,6 @@ class _MusicPlayerScreenState
                       Duration>(
                     stream:
                         _player.positionStream,
-
                     builder: (
                       context,
                       positionSnapshot,
@@ -448,9 +451,7 @@ class _MusicPlayerScreenState
                             value: position
                                 .inMilliseconds
                                 .toDouble(),
-
                             min: 0,
-
                             max: duration
                                         .inMilliseconds >
                                     0
@@ -458,21 +459,16 @@ class _MusicPlayerScreenState
                                     .inMilliseconds
                                     .toDouble()
                                 : 1,
-
                             activeColor:
                                 Colors.white,
-
                             inactiveColor:
                                 Colors.white24,
-
                             onChanged:
                                 (value) {
-                              _audioService
-                                  .seek(
+                              _audioService.seek(
                                 Duration(
                                   milliseconds:
-                                      value
-                                          .round(),
+                                      value.round(),
                                 ),
                               );
                             },
@@ -484,18 +480,15 @@ class _MusicPlayerScreenState
                                     .symmetric(
                               horizontal: 12,
                             ),
-
                             child: Row(
                               mainAxisAlignment:
                                   MainAxisAlignment
                                       .spaceBetween,
-
                               children: [
                                 Text(
                                   formatDuration(
                                     position,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
@@ -508,7 +501,6 @@ class _MusicPlayerScreenState
                                   formatDuration(
                                     duration,
                                   ),
-
                                   style:
                                       const TextStyle(
                                     color:
@@ -536,7 +528,6 @@ class _MusicPlayerScreenState
                 mainAxisAlignment:
                     MainAxisAlignment
                         .spaceEvenly,
-
                 children: [
                   // SHUFFLE
 
@@ -547,12 +538,9 @@ class _MusicPlayerScreenState
                             !isShuffle;
                       });
                     },
-
                     icon: Icon(
                       Icons.shuffle_rounded,
-
                       size: 30,
-
                       color: isShuffle
                           ? Colors
                               .deepPurpleAccent
@@ -565,7 +553,6 @@ class _MusicPlayerScreenState
                   IconButton(
                     onPressed:
                         previousSong,
-
                     icon: const Icon(
                       Icons
                           .skip_previous_rounded,
@@ -578,7 +565,6 @@ class _MusicPlayerScreenState
                   StreamBuilder<bool>(
                     stream:
                         _player.playingStream,
-
                     builder: (
                       context,
                       snapshot,
@@ -590,11 +576,9 @@ class _MusicPlayerScreenState
                       return GestureDetector(
                         onTap:
                             togglePlay,
-
                         child: Container(
                           width: 88,
                           height: 88,
-
                           decoration:
                               const BoxDecoration(
                             shape:
@@ -602,16 +586,13 @@ class _MusicPlayerScreenState
                             color:
                                 Colors.white,
                           ),
-
                           child: Icon(
                             isPlaying
                                 ? Icons
                                     .pause_rounded
                                 : Icons
                                     .play_arrow_rounded,
-
                             size: 55,
-
                             color:
                                 Colors.black,
                           ),
@@ -625,7 +606,6 @@ class _MusicPlayerScreenState
                   IconButton(
                     onPressed:
                         nextSong,
-
                     icon: const Icon(
                       Icons
                           .skip_next_rounded,
@@ -642,12 +622,9 @@ class _MusicPlayerScreenState
                             !isRepeat;
                       });
                     },
-
                     icon: Icon(
                       Icons.repeat_rounded,
-
                       size: 30,
-
                       color: isRepeat
                           ? Colors
                               .deepPurpleAccent
