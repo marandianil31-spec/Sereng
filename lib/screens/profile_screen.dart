@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
+import 'liked_songs_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,6 +21,15 @@ class ProfileScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => const SettingsScreen(),
+      ),
+    );
+  }
+
+  void _openLikedSongs(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LikedSongsScreen(),
       ),
     );
   }
@@ -152,12 +162,10 @@ class ProfileScreen extends StatelessWidget {
                   value: '24',
                   label: 'Liked',
                 ),
-
                 ProfileStat(
                   value: '5',
                   label: 'Playlists',
                 ),
-
                 ProfileStat(
                   value: '18',
                   label: 'Played',
@@ -168,7 +176,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // ACCOUNT
+          // ACCOUNT TITLE
           const Text(
             'Account',
             style: TextStyle(
@@ -179,12 +187,11 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // EDIT PROFILE MENU
+          // EDIT PROFILE
           ProfileMenuTile(
             icon: Icons.person_outline,
             title: 'Edit Profile',
             subtitle: 'Change your name and profile',
-
             onTap: () {
               _openEditProfile(context);
             },
@@ -195,15 +202,8 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.favorite_border,
             title: 'Liked Songs',
             subtitle: 'Your favorite music',
-
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Liked Songs screen will be connected next',
-                  ),
-                ),
-              );
+              _openLikedSongs(context);
             },
           ),
 
@@ -212,7 +212,6 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.notifications_none,
             title: 'Notifications',
             subtitle: 'Manage notifications',
-
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -229,7 +228,6 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.download_outlined,
             title: 'Downloads',
             subtitle: 'Manage downloaded songs',
-
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -243,7 +241,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
-          // SETTINGS
+          // SETTINGS TITLE
           const Text(
             'Settings',
             style: TextStyle(
@@ -259,7 +257,6 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.language,
             title: 'Language',
             subtitle: 'English',
-
             onTap: () {
               _openSettings(context);
             },
@@ -270,7 +267,6 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.dark_mode_outlined,
             title: 'Appearance',
             subtitle: 'Dark mode',
-
             onTap: () {
               _openSettings(context);
             },
@@ -281,7 +277,6 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.help_outline,
             title: 'Help & Support',
             subtitle: 'Get help with Sereng',
-
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -293,12 +288,11 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
 
-          // ABOUT
+          // ABOUT SERENG
           ProfileMenuTile(
             icon: Icons.info_outline,
             title: 'About Sereng',
             subtitle: 'App information',
-
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -318,13 +312,11 @@ class ProfileScreen extends StatelessWidget {
               color: const Color(0xFF141419),
               borderRadius: BorderRadius.circular(14),
             ),
-
             child: ListTile(
               leading: const Icon(
                 Icons.logout,
                 color: Colors.redAccent,
               ),
-
               title: const Text(
                 'Log Out',
                 style: TextStyle(
@@ -332,12 +324,11 @@ class ProfileScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                      'Logout will be connected next',
+                      'Logout will be connected later',
                     ),
                   ),
                 );
@@ -351,7 +342,7 @@ class ProfileScreen extends StatelessWidget {
 }
 
 
-// PROFILE STAT
+// PROFILE STAT WIDGET
 
 class ProfileStat extends StatelessWidget {
   final String value;
@@ -390,7 +381,7 @@ class ProfileStat extends StatelessWidget {
 }
 
 
-// PROFILE MENU TILE
+// PROFILE MENU TILE WIDGET
 
 class ProfileMenuTile extends StatelessWidget {
   final IconData icon;
@@ -419,8 +410,7 @@ class ProfileMenuTile extends StatelessWidget {
       ),
 
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(
+        contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 3,
         ),
@@ -431,8 +421,7 @@ class ProfileMenuTile extends StatelessWidget {
 
           decoration: BoxDecoration(
             color: const Color(0xFF27272A),
-            borderRadius:
-                BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(11),
           ),
 
           child: Icon(
