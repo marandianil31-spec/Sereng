@@ -7,12 +7,11 @@ import 'liked_songs_screen.dart';
 import 'notifications_screen.dart';
 import 'downloads_screen.dart';
 import 'help_support_screen.dart';
-import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  void _logout(BuildContext context) async {
+  Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
   }
 
@@ -96,7 +95,6 @@ class ProfileScreen extends StatelessWidget {
 
                 const Text(
                   'Sereng User',
-
                   style: TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.bold,
@@ -107,7 +105,6 @@ class ProfileScreen extends StatelessWidget {
 
                 const Text(
                   'Music lover',
-
                   style: TextStyle(
                     color: Colors.white54,
                     fontSize: 14,
@@ -126,7 +123,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     );
                   },
-
                   child: const Text(
                     'Edit Profile',
                   ),
@@ -173,9 +169,9 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
+          // ACCOUNT
           const Text(
             'Account',
-
             style: TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
@@ -254,9 +250,9 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
+          // SETTINGS TITLE
           const Text(
             'Settings',
-
             style: TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
@@ -299,7 +295,7 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
 
-          // HELP SUPPORT
+          // HELP & SUPPORT
           ProfileMenuTile(
             icon: Icons.help_outline,
             title: 'Help & Support',
@@ -316,7 +312,7 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
 
-          // ABOUT
+          // ABOUT SERENG
           ProfileMenuTile(
             icon: Icons.info_outline,
             title: 'About Sereng',
@@ -350,7 +346,6 @@ class ProfileScreen extends StatelessWidget {
 
               title: const Text(
                 'Log Out',
-
                 style: TextStyle(
                   color: Colors.redAccent,
                   fontWeight: FontWeight.bold,
@@ -358,7 +353,7 @@ class ProfileScreen extends StatelessWidget {
               ),
 
               onTap: () async {
-                await _logout(context);
+                await _logout();
               },
             ),
           ),
@@ -387,7 +382,6 @@ class ProfileStat extends StatelessWidget {
       children: [
         Text(
           value,
-
           style: const TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.bold,
@@ -398,7 +392,6 @@ class ProfileStat extends StatelessWidget {
 
         Text(
           label,
-
           style: const TextStyle(
             color: Colors.white54,
             fontSize: 12,
@@ -463,7 +456,6 @@ class ProfileMenuTile extends StatelessWidget {
 
         title: Text(
           title,
-
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -471,7 +463,6 @@ class ProfileMenuTile extends StatelessWidget {
 
         subtitle: Text(
           subtitle,
-
           style: const TextStyle(
             color: Colors.white54,
             fontSize: 11,
