@@ -1,18 +1,27 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
-import 'liked_songs_screen.dart';
-import 'notifications_screen.dart';
-import 'downloads_screen.dart';
-import 'help_support_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
+  void _openEditProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const EditProfileScreen(),
+      ),
+    );
+  }
+
+  void _openSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SettingsScreen(),
+      ),
+    );
   }
 
   @override
@@ -35,12 +44,7 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
+              _openSettings(context);
             },
             icon: const Icon(
               Icons.settings_outlined,
@@ -113,15 +117,10 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
+                // EDIT PROFILE BUTTON
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const EditProfileScreen(),
-                      ),
-                    );
+                    _openEditProfile(context);
                   },
                   child: const Text(
                     'Edit Profile',
@@ -180,20 +179,14 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // EDIT PROFILE
+          // EDIT PROFILE MENU
           ProfileMenuTile(
             icon: Icons.person_outline,
             title: 'Edit Profile',
             subtitle: 'Change your name and profile',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const EditProfileScreen(),
-                ),
-              );
+              _openEditProfile(context);
             },
           ),
 
@@ -204,11 +197,11 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Your favorite music',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const LikedSongsScreen(),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Liked Songs screen will be connected next',
+                  ),
                 ),
               );
             },
@@ -221,11 +214,11 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Manage notifications',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const NotificationsScreen(),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Notifications screen will be connected next',
+                  ),
                 ),
               );
             },
@@ -238,11 +231,11 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Manage downloaded songs',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const DownloadsScreen(),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Downloads screen will be connected next',
+                  ),
                 ),
               );
             },
@@ -250,7 +243,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
-          // SETTINGS TITLE
+          // SETTINGS
           const Text(
             'Settings',
             style: TextStyle(
@@ -268,13 +261,7 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'English',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const SettingsScreen(),
-                ),
-              );
+              _openSettings(context);
             },
           ),
 
@@ -285,13 +272,7 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Dark mode',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const SettingsScreen(),
-                ),
-              );
+              _openSettings(context);
             },
           ),
 
@@ -302,28 +283,28 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Get help with Sereng',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const HelpSupportScreen(),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Help & Support screen will be connected next',
+                  ),
                 ),
               );
             },
           ),
 
-          // ABOUT SERENG
+          // ABOUT
           ProfileMenuTile(
             icon: Icons.info_outline,
             title: 'About Sereng',
             subtitle: 'App information',
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const SettingsScreen(),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'About Sereng screen will be connected next',
+                  ),
                 ),
               );
             },
@@ -352,8 +333,14 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
 
-              onTap: () async {
-                await _logout();
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Logout will be connected next',
+                    ),
+                  ),
+                );
               },
             ),
           ),
