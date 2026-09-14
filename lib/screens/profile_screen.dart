@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'liked_songs_screen.dart';
+import 'downloads_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // OPEN EDIT PROFILE
   void _openEditProfile(BuildContext context) {
     Navigator.push(
       context,
@@ -17,7 +17,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // OPEN SETTINGS
   void _openSettings(BuildContext context) {
     Navigator.push(
       context,
@@ -27,7 +26,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // OPEN LIKED SONGS
   void _openLikedSongs(BuildContext context) {
     Navigator.push(
       context,
@@ -37,12 +35,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  void _openDownloads(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const DownloadsScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
 
-      // APP BAR
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
@@ -235,13 +241,7 @@ class ProfileScreen extends StatelessWidget {
             title: 'Downloads',
             subtitle: 'Manage downloaded songs',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Downloads screen will be connected next',
-                  ),
-                ),
-              );
+              _openDownloads(context);
             },
           ),
 
