@@ -7,6 +7,7 @@ import 'liked_songs_screen.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  // OPEN EDIT PROFILE
   void _openEditProfile(BuildContext context) {
     Navigator.push(
       context,
@@ -16,6 +17,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // OPEN SETTINGS
   void _openSettings(BuildContext context) {
     Navigator.push(
       context,
@@ -25,6 +27,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // OPEN LIKED SONGS
   void _openLikedSongs(BuildContext context) {
     Navigator.push(
       context,
@@ -39,6 +42,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
 
+      // APP BAR
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
@@ -162,10 +166,12 @@ class ProfileScreen extends StatelessWidget {
                   value: '24',
                   label: 'Liked',
                 ),
+
                 ProfileStat(
                   value: '5',
                   label: 'Playlists',
                 ),
+
                 ProfileStat(
                   value: '18',
                   label: 'Played',
@@ -312,11 +318,13 @@ class ProfileScreen extends StatelessWidget {
               color: const Color(0xFF141419),
               borderRadius: BorderRadius.circular(14),
             ),
+
             child: ListTile(
               leading: const Icon(
                 Icons.logout,
                 color: Colors.redAccent,
               ),
+
               title: const Text(
                 'Log Out',
                 style: TextStyle(
@@ -324,6 +332,7 @@ class ProfileScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
