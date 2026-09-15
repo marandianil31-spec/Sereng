@@ -64,10 +64,11 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
+  flutter:
   uses-material-design: true
 
-  dependency_overrides:
-    objective_c: 9.1.0
+dependency_overrides:
+  objective_c: 9.1.0
    
   
   # To add assets to your application, add an assets section, like this:
