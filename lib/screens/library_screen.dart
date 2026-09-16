@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'music_player_screen.dart';
+import 'liked_songs_screen.dart';
+import 'downloads_screen.dart';
+import 'recently_played_screen.dart';
+import 'playlist_screen.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
