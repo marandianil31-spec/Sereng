@@ -5,6 +5,7 @@ import 'edit_profile_screen.dart';
 import 'liked_songs_screen.dart';
 import 'downloads_screen.dart';
 import 'notifications_screen.dart';
+import 'help_support_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -49,9 +50,9 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   width: 90,
                   height: 90,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF292231),
+                    color: Color(0xFF292231),
                   ),
                   child: const Icon(
                     Icons.person_rounded,
@@ -76,7 +77,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 18),
-
                 SizedBox(
                   width: double.infinity,
                   height: 46,
@@ -168,9 +168,10 @@ class ProfileScreen extends StatelessWidget {
             title: 'Help & Support',
             subtitle: 'Get help with SERENG',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Help & Support coming soon'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HelpSupportScreen(),
                 ),
               );
             },
