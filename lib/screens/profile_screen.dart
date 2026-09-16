@@ -6,6 +6,7 @@ import 'liked_songs_screen.dart';
 import 'downloads_screen.dart';
 import 'notifications_screen.dart';
 import 'help_support_screen.dart';
+import 'about_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,9 +20,7 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -43,7 +42,6 @@ class ProfileScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 10),
 
-          // Profile header
           Center(
             child: Column(
               children: [
@@ -182,11 +180,11 @@ class ProfileScreen extends StatelessWidget {
             title: 'About SERENG',
             subtitle: 'Learn more about SERENG',
             onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'SERENG',
-                applicationVersion: '1.0.0',
-                applicationLegalese: '© SERENG',
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AboutScreen(),
+                ),
               );
             },
           ),
