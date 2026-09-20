@@ -25,7 +25,14 @@ class LibraryScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Library search coming soon'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
             icon: const Icon(Icons.search),
           ),
         ],
@@ -40,7 +47,9 @@ class LibraryScreen extends StatelessWidget {
               fontSize: 15,
             ),
           ),
+
           const SizedBox(height: 5),
+
           const Text(
             'Everything you love',
             style: TextStyle(
@@ -48,9 +57,12 @@ class LibraryScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 24),
 
+          // ====================================================
           // ROW 1
+          // ====================================================
           Row(
             children: [
               Expanded(
@@ -62,13 +74,16 @@ class LibraryScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const LikedSongsScreen(),
+                        builder: (context) =>
+                            const LikedSongsScreen(),
                       ),
                     );
                   },
                 ),
               ),
+
               const SizedBox(width: 12),
+
               Expanded(
                 child: LibraryCard(
                   icon: Icons.download,
@@ -78,7 +93,8 @@ class LibraryScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const DownloadsScreen(),
+                        builder: (context) =>
+                            const DownloadsScreen(),
                       ),
                     );
                   },
@@ -89,7 +105,9 @@ class LibraryScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // ====================================================
           // ROW 2
+          // ====================================================
           Row(
             children: [
               Expanded(
@@ -101,13 +119,16 @@ class LibraryScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const RecentlyPlayedScreen(),
+                        builder: (context) =>
+                            const RecentlyPlayedScreen(),
                       ),
                     );
                   },
                 ),
               ),
+
               const SizedBox(width: 12),
+
               Expanded(
                 child: LibraryCard(
                   icon: Icons.queue_music,
@@ -117,7 +138,8 @@ class LibraryScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const PlaylistScreen(),
+                        builder: (context) =>
+                            const PlaylistScreen(),
                       ),
                     );
                   },
@@ -128,9 +150,12 @@ class LibraryScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
+          // ====================================================
           // PLAYLISTS HEADER
+          // ====================================================
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Your Playlists',
@@ -139,8 +164,19 @@ class LibraryScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               TextButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const PlaylistScreen(
+                        playlistName: 'New Playlist',
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.add,
                   size: 18,
@@ -152,6 +188,9 @@ class LibraryScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // ====================================================
+          // PLAYLIST 1
+          // ====================================================
           PlaylistTile(
             title: 'My Favorites',
             subtitle: '24 songs',
@@ -160,7 +199,8 @@ class LibraryScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const PlaylistScreen(
+                  builder: (context) =>
+                      const PlaylistScreen(
                     playlistName: 'My Favorites',
                   ),
                 ),
@@ -168,6 +208,9 @@ class LibraryScreen extends StatelessWidget {
             },
           ),
 
+          // ====================================================
+          // PLAYLIST 2
+          // ====================================================
           PlaylistTile(
             title: 'Santhali Hits',
             subtitle: '18 songs',
@@ -176,7 +219,8 @@ class LibraryScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const PlaylistScreen(
+                  builder: (context) =>
+                      const PlaylistScreen(
                     playlistName: 'Santhali Hits',
                   ),
                 ),
@@ -184,6 +228,9 @@ class LibraryScreen extends StatelessWidget {
             },
           ),
 
+          // ====================================================
+          // PLAYLIST 3
+          // ====================================================
           PlaylistTile(
             title: 'Night Vibes',
             subtitle: '12 songs',
@@ -192,7 +239,8 @@ class LibraryScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const PlaylistScreen(
+                  builder: (context) =>
+                      const PlaylistScreen(
                     playlistName: 'Night Vibes',
                   ),
                 ),
@@ -202,7 +250,9 @@ class LibraryScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
+          // ====================================================
           // RECENTLY PLAYED
+          // ====================================================
           const Text(
             'Recently Played',
             style: TextStyle(
@@ -213,19 +263,24 @@ class LibraryScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          const LibrarySongTile(
+          LibrarySongTile(
             title: 'Dular Re',
             artist: 'Rahul Murmu',
           ),
 
-          const LibrarySongTile(
+          LibrarySongTile(
             title: 'Baha Bonga',
             artist: 'Pankaj Murmu',
           ),
 
-          const LibrarySongTile(
+          LibrarySongTile(
             title: 'Dular Gate',
             artist: 'Stephan Tudu',
+          ),
+
+          LibrarySongTile(
+            title: 'Johar Re',
+            artist: 'SERENG Artist',
           ),
         ],
       ),
@@ -264,15 +319,19 @@ class LibraryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          mainAxisAlignment:
+              MainAxisAlignment.center,
           children: [
             Icon(
               icon,
               size: 30,
               color: Colors.white70,
             ),
+
             const SizedBox(height: 9),
+
             Text(
               title,
               style: const TextStyle(
@@ -280,7 +339,9 @@ class LibraryCard extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
+
             const SizedBox(height: 3),
+
             Text(
               subtitle,
               style: const TextStyle(
@@ -322,8 +383,12 @@ class PlaylistTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 4,
+        ),
         onTap: onTap,
-        contentPadding: const EdgeInsets.all(10),
+
         leading: Container(
           width: 52,
           height: 52,
@@ -342,19 +407,25 @@ class PlaylistTile extends StatelessWidget {
             size: 27,
           ),
         ),
+
         title: Text(
           title,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 12,
+
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            subtitle,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 12,
+            ),
           ),
         ),
+
         trailing: const Icon(
           Icons.chevron_right,
           color: Colors.white38,
@@ -404,20 +475,31 @@ class LibrarySongTile extends StatelessWidget {
               color: Colors.white70,
             ),
           ),
+
           const SizedBox(width: 12),
+
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 3),
+
                 Text(
                   artist,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
@@ -426,12 +508,14 @@ class LibrarySongTile extends StatelessWidget {
               ],
             ),
           ),
+
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => MusicPlayerScreen(
+                  builder: (context) =>
+                      MusicPlayerScreen(
                     songTitle: title,
                     artistName: artist,
                   ),
