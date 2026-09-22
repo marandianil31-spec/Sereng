@@ -1,16 +1,54 @@
 import 'package:flutter/material.dart';
+
 import 'music_player_screen.dart';
+import 'search_screen.dart';
+import 'notifications_screen.dart';
+import 'artist_profile_screen.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
+
+  void openSearch(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SearchScreen(),
+      ),
+    );
+  }
+
+  void openNotifications(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationsScreen(),
+      ),
+    );
+  }
+
+  void openArtist(
+    BuildContext context,
+    String artistName,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArtistProfileScreen(
+          artistName: artistName,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
+
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
+
         title: const Text(
           'Explore',
           style: TextStyle(
@@ -18,16 +56,29 @@ class ExploreScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
+            tooltip: 'Notifications',
+            onPressed: () {
+              openNotifications(context);
+            },
+            icon: const Icon(
+              Icons.notifications_none,
+            ),
           ),
         ],
       ),
+
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          30,
+        ),
         children: [
+
           const Text(
             'Discover',
             style: TextStyle(
@@ -35,7 +86,9 @@ class ExploreScreen extends StatelessWidget {
               fontSize: 15,
             ),
           ),
+
           const SizedBox(height: 5),
+
           const Text(
             'Find your next favorite',
             style: TextStyle(
@@ -43,30 +96,39 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 22),
 
-          // Search box
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: const Color(0xFF18181F),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Row(
-              children: [
-                SizedBox(width: 16),
-                Icon(
-                  Icons.search,
-                  color: Colors.white54,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Search songs, artists, albums...',
-                  style: TextStyle(
+          // Search
+          GestureDetector(
+            onTap: () {
+              openSearch(context);
+            },
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF18181F),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Row(
+                children: [
+                  SizedBox(width: 16),
+
+                  Icon(
+                    Icons.search,
                     color: Colors.white54,
                   ),
-                ),
-              ],
+
+                  SizedBox(width: 12),
+
+                  Text(
+                    'Search songs, artists, albums...',
+                    style: TextStyle(
+                      color: Colors.white54,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -79,6 +141,7 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 14),
 
           SizedBox(
@@ -86,18 +149,22 @@ class ExploreScreen extends StatelessWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: const [
+
                 MoodCard(
                   title: 'Chill',
                   icon: Icons.nightlight_round,
                 ),
+
                 MoodCard(
                   title: 'Happy',
                   icon: Icons.sentiment_satisfied_alt,
                 ),
+
                 MoodCard(
                   title: 'Workout',
                   icon: Icons.fitness_center,
                 ),
+
                 MoodCard(
                   title: 'Romantic',
                   icon: Icons.favorite,
@@ -115,6 +182,7 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 14),
 
           const ExploreSongTile(
@@ -122,16 +190,19 @@ class ExploreScreen extends StatelessWidget {
             artist: 'Rahul Murmu',
             number: '01',
           ),
+
           const ExploreSongTile(
             title: 'Baha Bonga',
             artist: 'Pankaj Murmu',
             number: '02',
           ),
+
           const ExploreSongTile(
             title: 'Dular Gate',
             artist: 'Stephan Tudu',
             number: '03',
           ),
+
           const ExploreSongTile(
             title: 'Amge Mon',
             artist: 'Stephan Tudu',
@@ -147,22 +218,45 @@ class ExploreScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 16),
 
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
             children: [
+
               ArtistCircle(
                 name: 'Rahul Murmu',
                 icon: Icons.person,
+                onTap: () {
+                  openArtist(
+                    context,
+                    'Rahul Murmu',
+                  );
+                },
               ),
+
               ArtistCircle(
                 name: 'Pankaj Murmu',
                 icon: Icons.person,
+                onTap: () {
+                  openArtist(
+                    context,
+                    'Pankaj Murmu',
+                  );
+                },
               ),
+
               ArtistCircle(
                 name: 'Stephan Tudu',
                 icon: Icons.person,
+                onTap: () {
+                  openArtist(
+                    context,
+                    'Stephan Tudu',
+                  );
+                },
               ),
             ],
           ),
@@ -171,6 +265,11 @@ class ExploreScreen extends StatelessWidget {
     );
   }
 }
+
+
+// =====================================================
+// MOOD CARD
+// =====================================================
 
 class MoodCard extends StatelessWidget {
   final String title;
@@ -186,9 +285,14 @@ class MoodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 100,
-      margin: const EdgeInsets.only(right: 12),
+
+      margin: const EdgeInsets.only(
+        right: 12,
+      ),
+
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
+
         gradient: const LinearGradient(
           colors: [
             Color(0xFF7C3AED),
@@ -196,14 +300,20 @@ class MoodCard extends StatelessWidget {
           ],
         ),
       ),
+
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+
         children: [
+
           Icon(
             icon,
             size: 32,
           ),
+
           const SizedBox(height: 8),
+
           Text(
             title,
             style: const TextStyle(
@@ -215,6 +325,11 @@ class MoodCard extends StatelessWidget {
     );
   }
 }
+
+
+// =====================================================
+// EXPLORE SONG TILE
+// =====================================================
 
 class ExploreSongTile extends StatelessWidget {
   final String title;
@@ -231,17 +346,23 @@ class ExploreSongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
+      margin: const EdgeInsets.only(
+        bottom: 9,
+      ),
+
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 9,
       ),
+
       decoration: BoxDecoration(
         color: const Color(0xFF141419),
         borderRadius: BorderRadius.circular(14),
       ),
+
       child: Row(
         children: [
+
           SizedBox(
             width: 32,
             child: Text(
@@ -256,8 +377,11 @@ class ExploreSongTile extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
+
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius:
+                  BorderRadius.circular(10),
+
               gradient: const LinearGradient(
                 colors: [
                   Color(0xFF27272A),
@@ -265,6 +389,7 @@ class ExploreSongTile extends StatelessWidget {
                 ],
               ),
             ),
+
             child: const Icon(
               Icons.music_note,
               color: Colors.white70,
@@ -275,17 +400,30 @@ class ExploreSongTile extends StatelessWidget {
 
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
               children: [
+
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 3),
+
                 Text(
                   artist,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
@@ -295,19 +433,22 @@ class ExploreSongTile extends StatelessWidget {
             ),
           ),
 
-          // Play button
           IconButton(
+            tooltip: 'Play',
+
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MusicPlayerScreen(
+                  builder: (context) =>
+                      MusicPlayerScreen(
                     songTitle: title,
                     artistName: artist,
                   ),
                 ),
               );
             },
+
             icon: const Icon(
               Icons.play_circle_outline,
               size: 30,
@@ -319,50 +460,71 @@ class ExploreSongTile extends StatelessWidget {
   }
 }
 
+
+// =====================================================
+// ARTIST CIRCLE
+// =====================================================
+
 class ArtistCircle extends StatelessWidget {
   final String name;
   final IconData icon;
+  final VoidCallback onTap;
 
   const ArtistCircle({
     super.key,
     required this.name,
     required this.icon,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 95,
-      child: Column(
-        children: [
-          Container(
-            width: 65,
-            height: 65,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFFEC4899),
-                ],
+
+      child: InkWell(
+        onTap: onTap,
+        borderRadius:
+            BorderRadius.circular(50),
+
+        child: Column(
+          children: [
+
+            Container(
+              width: 65,
+              height: 65,
+
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF7C3AED),
+                    Color(0xFFEC4899),
+                  ],
+                ),
+              ),
+
+              child: Icon(
+                icon,
+                size: 34,
               ),
             ),
-            child: Icon(
-              icon,
-              size: 34,
+
+            const SizedBox(height: 8),
+
+            Text(
+              name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white70,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.white70,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
