@@ -1,542 +1,451 @@
 import 'package:flutter/material.dart';
 
 import 'music_player_screen.dart';
-import 'album_detail_screen.dart';
+import 'search_screen.dart';
+import 'notifications_screen.dart';
+import 'artist_profile_screen.dart';
 
-class ArtistProfileScreen extends StatefulWidget {
-  const ArtistProfileScreen({super.key});
+class ExploreScreen extends StatelessWidget {
+  const ExploreScreen({super.key});
 
-  @override
-  State<ArtistProfileScreen> createState() =>
-      _ArtistProfileScreenState();
-}
+  void openSearch(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SearchScreen(),
+      ),
+    );
+  }
 
-class _ArtistProfileScreenState
-    extends State<ArtistProfileScreen> {
-  bool isFollowing = false;
+  void openNotifications(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationsScreen(),
+      ),
+    );
+  }
 
-  final List<Map<String, String>> songs = [
-    {
-      'title': 'Johar Re',
-      'subtitle': 'Popular Song',
-    },
-    {
-      'title': 'Adivasi Beats',
-      'subtitle': 'Latest Release',
-    },
-    {
-      'title': 'Sarna Song',
-      'subtitle': 'Popular Song',
-    },
-    {
-      'title': 'New Santhali Song',
-      'subtitle': 'Single',
-    },
-    {
-      'title': 'Disom Re',
-      'subtitle': 'Album Track',
-    },
-  ];
-
-  final List<Map<String, String>> albums = [
-    {
-      'title': 'Johar',
-      'year': '2026',
-    },
-    {
-      'title': 'Adivasi Beats',
-      'year': '2025',
-    },
-    {
-      'title': 'Sarna',
-      'year': '2025',
-    },
-  ];
+  void openArtist(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ArtistProfileScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // APP BAR
-            SliverAppBar(
-              backgroundColor: const Color(0xFF0B0B0F),
-              elevation: 0,
-              pinned: true,
-              leading: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back_rounded,
-                ),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0B0B0F),
+        elevation: 0,
+        title: const Text(
+          'Explore',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Notifications',
+            onPressed: () {
+              openNotifications(context);
+            },
+            icon: const Icon(
+              Icons.notifications_none,
+            ),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          30,
+        ),
+        children: [
+          const Text(
+            'Discover',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 15,
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          const Text(
+            'Find your next favorite',
+            style: TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          // SEARCH
+          GestureDetector(
+            onTap: () {
+              openSearch(context);
+            },
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF18181F),
+                borderRadius: BorderRadius.circular(16),
               ),
-              title: const Text(
-                'Artist',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.more_vert_rounded,
+              child: const Row(
+                children: [
+                  SizedBox(width: 16),
+                  Icon(
+                    Icons.search,
+                    color: Colors.white54,
                   ),
+                  SizedBox(width: 12),
+                  Text(
+                    'Search songs, artists, albums...',
+                    style: TextStyle(
+                      color: Colors.white54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          const Text(
+            'Browse by Mood',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          SizedBox(
+            height: 105,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: const [
+                MoodCard(
+                  title: 'Chill',
+                  icon: Icons.nightlight_round,
+                ),
+                MoodCard(
+                  title: 'Happy',
+                  icon: Icons.sentiment_satisfied_alt,
+                ),
+                MoodCard(
+                  title: 'Workout',
+                  icon: Icons.fitness_center,
+                ),
+                MoodCard(
+                  title: 'Romantic',
+                  icon: Icons.favorite,
                 ),
               ],
             ),
+          ),
 
-            // ARTIST PROFILE
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  15,
-                  20,
-                  10,
-                ),
-                child: Column(
-                  children: [
-                    // ARTIST IMAGE
-                    Container(
-                      width: 125,
-                      height: 125,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFF24202D),
-                        border: Border.all(
-                          color: Colors.white12,
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        size: 70,
-                        color: Colors.white54,
-                      ),
-                    ),
+          const SizedBox(height: 28),
 
-                    const SizedBox(height: 16),
-
-                    // ARTIST NAME
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'SERENG Artist',
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(width: 6),
-
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            size: 14,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 7),
-
-                    const Text(
-                      'Santhali Music Artist',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 13,
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // STATS
-                    const Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center,
-                      children: [
-                        _StatItem(
-                          value: '12.5K',
-                          label: 'Followers',
-                        ),
-                        SizedBox(width: 35),
-                        _StatItem(
-                          value: '38',
-                          label: 'Songs',
-                        ),
-                        SizedBox(width: 35),
-                        _StatItem(
-                          value: '6',
-                          label: 'Albums',
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // FOLLOW BUTTON
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 46,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isFollowing =
-                                      !isFollowing;
-                                });
-                              },
-                              style:
-                                  ElevatedButton.styleFrom(
-                                backgroundColor: isFollowing
-                                    ? const Color(0xFF24202D)
-                                    : Colors.white,
-                                foregroundColor: isFollowing
-                                    ? Colors.white
-                                    : Colors.black,
-                                elevation: 0,
-                                shape:
-                                    RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(14),
-                                ),
-                              ),
-                              child: Text(
-                                isFollowing
-                                    ? 'Following'
-                                    : 'Follow',
-                                style: const TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Container(
-                          height: 46,
-                          width: 46,
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF141419),
-                            borderRadius:
-                                BorderRadius.circular(14),
-                          ),
-                          child: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.share_rounded,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          const Text(
+            'Trending Now',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.bold,
             ),
+          ),
 
-            // POPULAR SONGS TITLE
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  18,
-                  22,
-                  18,
-                  12,
-                ),
-                child: Text(
-                  'Popular Songs',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+          const SizedBox(height: 14),
+
+          const ExploreSongTile(
+            title: 'Dular Re',
+            artist: 'Rahul Murmu',
+            number: '01',
+          ),
+
+          const ExploreSongTile(
+            title: 'Baha Bonga',
+            artist: 'Pankaj Murmu',
+            number: '02',
+          ),
+
+          const ExploreSongTile(
+            title: 'Dular Gate',
+            artist: 'Stephan Tudu',
+            number: '03',
+          ),
+
+          const ExploreSongTile(
+            title: 'Amge Mon',
+            artist: 'Stephan Tudu',
+            number: '04',
+          ),
+
+          const SizedBox(height: 20),
+
+          const Text(
+            'Popular Artists',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.bold,
             ),
+          ),
 
-            // POPULAR SONGS
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final song = songs[index];
+          const SizedBox(height: 16),
 
-                  return Container(
-                    margin: const EdgeInsets.fromLTRB(
-                      14,
-                      0,
-                      14,
-                      8,
-                    ),
-                    padding: const EdgeInsets.all(9),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF141419),
-                      borderRadius:
-                          BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            color: Colors.white38,
-                            fontSize: 13,
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF292231),
-                            borderRadius:
-                                BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.music_note_rounded,
-                            color: Colors.white70,
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                song['title']!,
-                                maxLines: 1,
-                                overflow:
-                                    TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                song['subtitle']!,
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // PLAY BUTTON
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    MusicPlayerScreen(
-                                  songTitle:
-                                      song['title']!,
-                                  artistName:
-                                      'SERENG Artist',
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons
-                                .play_circle_fill_rounded,
-                            size: 28,
-                          ),
-                        ),
-
-                        // MORE BUTTON
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.more_vert_rounded,
-                            color: Colors.white54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
+            children: [
+              ArtistCircle(
+                name: 'Rahul Murmu',
+                icon: Icons.person,
+                onTap: () {
+                  openArtist(context);
                 },
-                childCount: songs.length,
               ),
-            ),
-
-            // ALBUMS TITLE
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  18,
-                  25,
-                  18,
-                  12,
-                ),
-                child: Text(
-                  'Albums',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              ArtistCircle(
+                name: 'Pankaj Murmu',
+                icon: Icons.person,
+                onTap: () {
+                  openArtist(context);
+                },
               ),
-            ),
-
-            // ALBUM LIST
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 185,
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                  ),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: albums.length,
-                  itemBuilder: (context, index) {
-                    final album = albums[index];
-
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AlbumDetailScreen(
-                              albumName:
-                                  album['title']!,
-                              artistName:
-                                  'SERENG Artist',
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 145,
-                        margin: const EdgeInsets.only(
-                          right: 12,
-                        ),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            // ALBUM COVER
-                            Container(
-                              width: 145,
-                              height: 125,
-                              decoration: BoxDecoration(
-                                color:
-                                    const Color(0xFF24202D),
-                                borderRadius:
-                                    BorderRadius.circular(14),
-                              ),
-                              child: const Icon(
-                                Icons.album_rounded,
-                                size: 55,
-                                color: Colors.white54,
-                              ),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            // ALBUM NAME
-                            Text(
-                              album['title']!,
-                              maxLines: 1,
-                              overflow:
-                                  TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-
-                            const SizedBox(height: 3),
-
-                            // ALBUM YEAR
-                            Text(
-                              album['year']!,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+              ArtistCircle(
+                name: 'Stephan Tudu',
+                icon: Icons.person,
+                onTap: () {
+                  openArtist(context);
+                },
               ),
-            ),
-
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 35),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
-  final String value;
-  final String label;
+class MoodCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
 
-  const _StatItem({
-    required this.value,
-    required this.label,
+  const MoodCard({
+    super.key,
+    required this.title,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF7C3AED),
+            Color(0xFFEC4899),
+          ],
         ),
-
-        const SizedBox(height: 3),
-
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 11,
+      ),
+      child: Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 32,
           ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExploreSongTile extends StatelessWidget {
+  final String title;
+  final String artist;
+  final String number;
+
+  const ExploreSongTile({
+    super.key,
+    required this.title,
+    required this.artist,
+    required this.number,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 9,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF141419),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 32,
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF27272A),
+                  Color(0xFF3F3F46),
+                ],
+              ),
+            ),
+            child: const Icon(
+              Icons.music_note,
+              color: Colors.white70,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  artist,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          IconButton(
+            tooltip: 'Play',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      MusicPlayerScreen(
+                    songTitle: title,
+                    artistName: artist,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.play_circle_outline,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ArtistCircle extends StatelessWidget {
+  final String name;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const ArtistCircle({
+    super.key,
+    required this.name,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 95,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(50),
+        child: Column(
+          children: [
+            Container(
+              width: 65,
+              height: 65,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF7C3AED),
+                    Color(0xFFEC4899),
+                  ],
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 34,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white70,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
