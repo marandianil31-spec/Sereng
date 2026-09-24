@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'music_player_screen.dart';
+import 'album_detail_screen.dart';
+
 class ArtistDetailScreen extends StatefulWidget {
   const ArtistDetailScreen({super.key});
 
@@ -35,6 +38,36 @@ class _ArtistDetailScreenState
     },
   ];
 
+  void openPlayer(
+    BuildContext context,
+    String songTitle,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerScreen(
+          songTitle: songTitle,
+          artistName: 'Rahul Murmu',
+        ),
+      ),
+    );
+  }
+
+  void openAlbum(
+    BuildContext context,
+    String albumName,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlbumDetailScreen(
+          albumName: albumName,
+          artistName: 'Rahul Murmu',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,16 +78,25 @@ class _ArtistDetailScreenState
             expandedHeight: 280,
             pinned: true,
             backgroundColor: const Color(0xFF0B0B0F),
+
             leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.arrow_back,
+              ),
             ),
+
             actions: [
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.more_vert),
+                icon: const Icon(
+                  Icons.more_vert,
+                ),
               ),
             ],
+
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
@@ -68,16 +110,19 @@ class _ArtistDetailScreenState
                     ],
                   ),
                 ),
+
                 child: SafeArea(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment:
+                        MainAxisAlignment.end,
                     children: [
                       Container(
                         width: 125,
                         height: 125,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
+                          gradient:
+                              const LinearGradient(
                             colors: [
                               Color(0xFF7C3AED),
                               Color(0xFFEC4899),
@@ -97,7 +142,9 @@ class _ArtistDetailScreenState
                           color: Colors.white,
                         ),
                       ),
+
                       const SizedBox(height: 15),
+
                       Row(
                         mainAxisAlignment:
                             MainAxisAlignment.center,
@@ -106,17 +153,22 @@ class _ArtistDetailScreenState
                             'Rahul Murmu',
                             style: TextStyle(
                               fontSize: 27,
-                              fontWeight: FontWeight.bold,
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
+
                           SizedBox(width: 7),
+
                           Icon(
                             Icons.verified,
                             size: 20,
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 5),
+
                       const Text(
                         'Santhali Artist',
                         style: TextStyle(
@@ -140,63 +192,89 @@ class _ArtistDetailScreenState
                 30,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
+                  // PLAY + FOLLOW
                   Row(
                     children: [
                       Expanded(
                         child: SizedBox(
                           height: 48,
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (songs.isNotEmpty) {
+                                openPlayer(
+                                  context,
+                                  songs.first['title']!,
+                                );
+                              }
+                            },
                             icon: const Icon(
                               Icons.play_arrow_rounded,
                             ),
                             label: const Text(
                               'Play',
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
+                            style:
+                                ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.white,
+                              foregroundColor:
+                                  Colors.black,
+                              shape:
+                                  RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(14),
+                                    BorderRadius.circular(
+                                  14,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
+
                       const SizedBox(width: 10),
+
                       Expanded(
                         child: SizedBox(
                           height: 48,
                           child: OutlinedButton.icon(
                             onPressed: () {
                               setState(() {
-                                isFollowing = !isFollowing;
+                                isFollowing =
+                                    !isFollowing;
                               });
                             },
                             icon: Icon(
                               isFollowing
                                   ? Icons.check
-                                  : Icons.person_add_outlined,
+                                  : Icons
+                                      .person_add_outlined,
                             ),
                             label: Text(
                               isFollowing
                                   ? 'Following'
                                   : 'Follow',
                             ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
+                            style:
+                                OutlinedButton.styleFrom(
+                              foregroundColor:
+                                  Colors.white,
+                              side:
+                                  const BorderSide(
                                 color: Colors.white24,
                               ),
-                              shape: RoundedRectangleBorder(
+                              shape:
+                                  RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(14),
+                                    BorderRadius.circular(
+                                  14,
+                                ),
                               ),
                             ),
                           ),
@@ -207,10 +285,11 @@ class _ArtistDetailScreenState
 
                   const SizedBox(height: 25),
 
-                  Row(
+                  // STATS
+                  const Row(
                     mainAxisAlignment:
                         MainAxisAlignment.spaceAround,
-                    children: const [
+                    children: [
                       ArtistStat(
                         value: '1.8M',
                         label: 'Monthly Listeners',
@@ -247,6 +326,12 @@ class _ArtistDetailScreenState
                         number: '${index + 1}',
                         title: song['title']!,
                         plays: song['plays']!,
+                        onPlay: () {
+                          openPlayer(
+                            context,
+                            song['title']!,
+                          );
+                        },
                       );
                     },
                   ),
@@ -266,19 +351,40 @@ class _ArtistDetailScreenState
                   SizedBox(
                     height: 190,
                     child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: const [
+                      scrollDirection:
+                          Axis.horizontal,
+                      children: [
                         AlbumCard(
                           title: 'Dular Re',
                           year: '2026',
+                          onTap: () {
+                            openAlbum(
+                              context,
+                              'Dular Re',
+                            );
+                          },
                         ),
+
                         AlbumCard(
                           title: 'Baha Bonga',
                           year: '2025',
+                          onTap: () {
+                            openAlbum(
+                              context,
+                              'Baha Bonga',
+                            );
+                          },
                         ),
+
                         AlbumCard(
                           title: 'Amge Mon',
                           year: '2025',
+                          onTap: () {
+                            openAlbum(
+                              context,
+                              'Amge Mon',
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -355,18 +461,22 @@ class ArtistSongTile extends StatelessWidget {
   final String number;
   final String title;
   final String plays;
+  final VoidCallback onPlay;
 
   const ArtistSongTile({
     super.key,
     required this.number,
     required this.title,
     required this.plays,
+    required this.onPlay,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(
+        bottom: 8,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 9,
@@ -392,8 +502,10 @@ class ArtistSongTile extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(
+              borderRadius:
+                  BorderRadius.circular(10),
+              gradient:
+                  const LinearGradient(
                 colors: [
                   Color(0xFF7C3AED),
                   Color(0xFFEC4899),
@@ -415,11 +527,16 @@ class ArtistSongTile extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   plays,
                   style: const TextStyle(
@@ -432,7 +549,7 @@ class ArtistSongTile extends StatelessWidget {
           ),
 
           IconButton(
-            onPressed: () {},
+            onPressed: onPlay,
             icon: const Icon(
               Icons.play_circle_outline,
               size: 30,
@@ -447,63 +564,75 @@ class ArtistSongTile extends StatelessWidget {
 class AlbumCard extends StatelessWidget {
   final String title;
   final String year;
+  final VoidCallback onTap;
 
   const AlbumCard({
     super.key,
     required this.title,
     required this.year,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 145,
-      margin: const EdgeInsets.only(right: 14),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 140,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFFEC4899),
-                ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 145,
+        margin: const EdgeInsets.only(
+          right: 14,
+        ),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 140,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(18),
+                gradient:
+                    const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF7C3AED),
+                    Color(0xFFEC4899),
+                  ],
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.album_rounded,
+                  size: 60,
+                  color: Colors.white70,
+                ),
               ),
             ),
-            child: const Center(
-              child: Icon(
-                Icons.album_rounded,
-                size: 60,
-                color: Colors.white70,
+
+            const SizedBox(height: 8),
+
+            Text(
+              title,
+              maxLines: 1,
+              overflow:
+                  TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 3),
 
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+            Text(
+              year,
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 11,
+              ),
             ),
-          ),
-
-          const SizedBox(height: 3),
-
-          Text(
-            year,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 11,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
