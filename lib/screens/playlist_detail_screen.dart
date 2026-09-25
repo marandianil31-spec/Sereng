@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'music_player_screen.dart';
+
 class PlaylistDetailScreen extends StatelessWidget {
   final String playlistName;
   final String description;
@@ -10,70 +12,102 @@ class PlaylistDetailScreen extends StatelessWidget {
     this.description = 'Best Santhali songs collection',
   });
 
+  final List<Map<String, String>> songs = const [
+    {
+      'title': 'Dular Re',
+      'artist': 'Rahul Murmu',
+    },
+    {
+      'title': 'Baha Bonga',
+      'artist': 'Pankaj Murmu',
+    },
+    {
+      'title': 'Dular Gate',
+      'artist': 'Stephan Tudu',
+    },
+    {
+      'title': 'Amge Mon',
+      'artist': 'Stephan Tudu',
+    },
+    {
+      'title': 'Sari Sari',
+      'artist': 'Rahul Murmu',
+    },
+    {
+      'title': 'Johar Re',
+      'artist': 'Pankaj Murmu',
+    },
+  ];
+
+  void openPlayer(
+    BuildContext context,
+    String title,
+    String artist,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerScreen(
+          songTitle: title,
+          artistName: artist,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final songs = [
-      {
-        'title': 'Dular Re',
-        'artist': 'Rahul Murmu',
-      },
-      {
-        'title': 'Baha Bonga',
-        'artist': 'Pankaj Murmu',
-      },
-      {
-        'title': 'Dular Gate',
-        'artist': 'Stephan Tudu',
-      },
-      {
-        'title': 'Amge Mon',
-        'artist': 'Stephan Tudu',
-      },
-      {
-        'title': 'Sari Sari',
-        'artist': 'Rahul Murmu',
-      },
-      {
-        'title': 'Johar Re',
-        'artist': 'Pankaj Murmu',
-      },
-    ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
 
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
+
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+          ),
         ),
+
         title: const Text(
           'Playlist',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
+
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(
+              Icons.more_vert,
+            ),
           ),
         ],
       ),
 
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          30,
+        ),
         children: [
-          // Playlist cover
+          // PLAYLIST COVER
           Center(
             child: Container(
               width: 210,
               height: 210,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const LinearGradient(
+                borderRadius:
+                    BorderRadius.circular(24),
+                gradient:
+                    const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
@@ -99,7 +133,7 @@ class PlaylistDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Playlist name
+          // PLAYLIST NAME
           Text(
             playlistName,
             textAlign: TextAlign.center,
@@ -122,10 +156,10 @@ class PlaylistDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          const Text(
-            '6 songs • SERENG',
+          Text(
+            '${songs.length} songs • SERENG',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white38,
               fontSize: 12,
             ),
@@ -133,22 +167,41 @@ class PlaylistDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Action buttons
+          // SHUFFLE + PLAY ALL
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.shuffle),
-                  label: const Text('Shuffle'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
+                  onPressed: () {
+                    if (songs.isEmpty) return;
+
+                    openPlayer(
+                      context,
+                      songs.first['title']!,
+                      songs.first['artist']!,
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.shuffle,
+                  ),
+                  label: const Text(
+                    'Shuffle',
+                  ),
+                  style:
+                      OutlinedButton.styleFrom(
+                    foregroundColor:
+                        Colors.white,
                     side: const BorderSide(
                       color: Colors.white24,
                     ),
-                    minimumSize: const Size(0, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                    minimumSize:
+                        const Size(0, 52),
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(
+                        15,
+                      ),
                     ),
                   ),
                 ),
@@ -158,15 +211,35 @@ class PlaylistDetailScreen extends StatelessWidget {
 
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Play All'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    minimumSize: const Size(0, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                  onPressed: () {
+                    if (songs.isEmpty) return;
+
+                    openPlayer(
+                      context,
+                      songs.first['title']!,
+                      songs.first['artist']!,
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.play_arrow_rounded,
+                  ),
+                  label: const Text(
+                    'Play All',
+                  ),
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.white,
+                    foregroundColor:
+                        Colors.black,
+                    minimumSize:
+                        const Size(0, 52),
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(
+                        15,
+                      ),
                     ),
                   ),
                 ),
@@ -186,16 +259,27 @@ class PlaylistDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // Song list
+          // SONG LIST
           ...List.generate(
             songs.length,
             (index) {
               final song = songs[index];
 
               return PlaylistSongTile(
-                number: '${index + 1}'.padLeft(2, '0'),
+                number:
+                    '${index + 1}'.padLeft(
+                  2,
+                  '0',
+                ),
                 title: song['title']!,
                 artist: song['artist']!,
+                onPlay: () {
+                  openPlayer(
+                    context,
+                    song['title']!,
+                    song['artist']!,
+                  );
+                },
               );
             },
           ),
@@ -209,25 +293,30 @@ class PlaylistSongTile extends StatelessWidget {
   final String number;
   final String title;
   final String artist;
+  final VoidCallback onPlay;
 
   const PlaylistSongTile({
     super.key,
     required this.number,
     required this.title,
     required this.artist,
+    required this.onPlay,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
+      margin: const EdgeInsets.only(
+        bottom: 9,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 9,
       ),
       decoration: BoxDecoration(
         color: const Color(0xFF141419),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius:
+            BorderRadius.circular(14),
       ),
       child: Row(
         children: [
@@ -246,8 +335,10 @@ class PlaylistSongTile extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(
+              borderRadius:
+                  BorderRadius.circular(10),
+              gradient:
+                  const LinearGradient(
                 colors: [
                   Color(0xFF27272A),
                   Color(0xFF3F3F46),
@@ -264,22 +355,28 @@ class PlaylistSongTile extends StatelessWidget {
 
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   artist,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
@@ -290,7 +387,7 @@ class PlaylistSongTile extends StatelessWidget {
           ),
 
           IconButton(
-            onPressed: () {},
+            onPressed: onPlay,
             icon: const Icon(
               Icons.play_circle_outline,
               size: 30,
