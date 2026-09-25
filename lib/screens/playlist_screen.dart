@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'music_player_screen.dart';
+import 'playlist_detail_screen.dart';
 
 class PlaylistScreen extends StatelessWidget {
   final String playlistName;
@@ -52,6 +54,18 @@ class PlaylistScreen extends StatelessWidget {
     );
   }
 
+  void openPlaylistDetail(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlaylistDetailScreen(
+          playlistName: playlistName,
+          description: 'A collection of your favorite songs',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,32 +101,35 @@ class PlaylistScreen extends StatelessWidget {
         ),
         children: [
           // Playlist cover
-          Center(
-            child: Container(
-              width: 210,
-              height: 210,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF7C3AED),
-                    Color(0xFFEC4899),
+          GestureDetector(
+            onTap: () => openPlaylistDetail(context),
+            child: Center(
+              child: Container(
+                width: 210,
+                height: 210,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF7C3AED),
+                      Color(0xFFEC4899),
+                    ],
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black54,
+                      blurRadius: 25,
+                      offset: Offset(0, 15),
+                    ),
                   ],
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black54,
-                    blurRadius: 25,
-                    offset: Offset(0, 15),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.queue_music_rounded,
-                size: 90,
-                color: Colors.white,
+                child: const Icon(
+                  Icons.queue_music_rounded,
+                  size: 90,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -120,12 +137,15 @@ class PlaylistScreen extends StatelessWidget {
           const SizedBox(height: 25),
 
           // Playlist information
-          Text(
-            playlistName,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 27,
-              fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: () => openPlaylistDetail(context),
+            child: Text(
+              playlistName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 27,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -158,7 +178,11 @@ class PlaylistScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (songs.isNotEmpty) {
+                      openPlayer(context, songs.first);
+                    }
+                  },
                   icon: const Icon(Icons.shuffle),
                   label: const Text('Shuffle'),
                   style: OutlinedButton.styleFrom(
@@ -200,12 +224,28 @@ class PlaylistScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          const Text(
-            'Songs',
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Songs',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              TextButton(
+                onPressed: () => openPlaylistDetail(context),
+                child: const Text(
+                  'View All',
+                  style: TextStyle(
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 12),
@@ -221,6 +261,9 @@ class PlaylistScreen extends StatelessWidget {
                 song: song,
                 onPlay: () {
                   openPlayer(context, song);
+                },
+                onOpen: () {
+                  openPlaylistDetail(context);
                 },
               );
             },
@@ -247,110 +290,115 @@ class PlaylistSongTile extends StatelessWidget {
   final String number;
   final PlaylistSong song;
   final VoidCallback onPlay;
+  final VoidCallback onOpen;
 
   const PlaylistSongTile({
     super.key,
     required this.number,
     required this.song,
     required this.onPlay,
+    required this.onOpen,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 9,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF141419),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: Colors.white38,
-                fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: onOpen,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 9,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141419),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 32,
+              child: Text(
+                number,
+                style: const TextStyle(
+                  color: Colors.white38,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
 
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(11),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF27272A),
-                  Color(0xFF3F3F46),
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(11),
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF27272A),
+                    Color(0xFF3F3F46),
+                  ],
+                ),
+              ),
+              child: const Icon(
+                Icons.music_note,
+                color: Colors.white70,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    song.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    song.artist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
-            child: const Icon(
-              Icons.music_note,
-              color: Colors.white70,
-            ),
-          ),
 
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  song.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  song.artist,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            Text(
+              song.duration,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 11,
+              ),
             ),
-          ),
 
-          Text(
-            song.duration,
-            style: const TextStyle(
-              color: Colors.white38,
-              fontSize: 11,
+            IconButton(
+              onPressed: onPlay,
+              icon: const Icon(
+                Icons.play_circle_outline,
+                size: 30,
+              ),
             ),
-          ),
 
-          IconButton(
-            onPressed: onPlay,
-            icon: const Icon(
-              Icons.play_circle_outline,
-              size: 30,
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.more_vert,
+                color: Colors.white38,
+              ),
             ),
-          ),
-
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.more_vert,
-              color: Colors.white38,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
