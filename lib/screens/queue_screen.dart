@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'music_player_screen.dart';
+
 class QueueScreen extends StatefulWidget {
   const QueueScreen({super.key});
 
@@ -27,10 +29,26 @@ class _QueueScreenState extends State<QueueScreen> {
     },
   ];
 
+  void openPlayer(
+    BuildContext context,
+    Map<String, String> song,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerScreen(
+          songTitle: song['title']!,
+          artistName: song['artist']!,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
+
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
@@ -57,6 +75,7 @@ class _QueueScreenState extends State<QueueScreen> {
             ),
         ],
       ),
+
       body: queue.isEmpty
           ? const Center(
               child: Column(
@@ -98,6 +117,7 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                   ),
                 ),
+
                 Expanded(
                   child: ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(
@@ -105,7 +125,6 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                     itemCount: queue.length,
 
-                    // Flutter ke naye version ke liye
                     onReorderItem: (oldIndex, newIndex) {
                       setState(() {
                         final item = queue.removeAt(oldIndex);
@@ -116,74 +135,99 @@ class _QueueScreenState extends State<QueueScreen> {
                     itemBuilder: (context, index) {
                       final song = queue[index];
 
-                      return Container(
+                      return GestureDetector(
                         key: ValueKey(
                           '${song['title']}_$index',
                         ),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF141419),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.drag_handle_rounded,
-                              color: Colors.white30,
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF292231),
-                                borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          openPlayer(context, song);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF141419),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.drag_handle_rounded,
+                                color: Colors.white30,
                               ),
-                              child: const Icon(
-                                Icons.music_note_rounded,
-                                color: Colors.white70,
+
+                              const SizedBox(width: 8),
+
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF292231),
+                                  borderRadius:
+                                      BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.music_note_rounded,
+                                  color: Colors.white70,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 13),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    song['title']!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+
+                              const SizedBox(width: 13),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      song['title']!,
+                                      maxLines: 1,
+                                      overflow:
+                                          TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    song['artist']!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white54,
-                                      fontSize: 12,
+
+                                    const SizedBox(height: 4),
+
+                                    Text(
+                                      song['artist']!,
+                                      maxLines: 1,
+                                      overflow:
+                                          TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  queue.removeAt(index);
-                                });
-                              },
-                              icon: const Icon(
-                                Icons.close_rounded,
-                                color: Colors.white54,
+
+                              IconButton(
+                                onPressed: () {
+                                  openPlayer(context, song);
+                                },
+                                icon: const Icon(
+                                  Icons.play_circle_outline,
+                                  size: 30,
+                                ),
                               ),
-                            ),
-                          ],
+
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    queue.removeAt(index);
+                                  });
+                                },
+                                icon: const Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.white54,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
