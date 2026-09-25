@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'lyrics_screen.dart';
+import 'music_player_screen.dart';
+
 class SongDetailsScreen extends StatefulWidget {
   final String songTitle;
   final String artistName;
@@ -16,6 +19,30 @@ class SongDetailsScreen extends StatefulWidget {
 
 class _SongDetailsScreenState extends State<SongDetailsScreen> {
   bool isLiked = false;
+
+  void openPlayer() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MusicPlayerScreen(
+          songTitle: widget.songTitle,
+          artistName: widget.artistName,
+        ),
+      ),
+    );
+  }
+
+  void openLyrics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LyricsScreen(
+          songTitle: widget.songTitle,
+          artistName: widget.artistName,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +176,7 @@ class _SongDetailsScreenState extends State<SongDetailsScreen> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: openPlayer,
                 icon: const Icon(
                   Icons.play_arrow_rounded,
                   size: 27,
@@ -237,7 +264,7 @@ class _SongDetailsScreenState extends State<SongDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: openLyrics,
                 icon: const Icon(Icons.lyrics_rounded),
                 label: const Text('View Lyrics'),
                 style: OutlinedButton.styleFrom(
