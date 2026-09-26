@@ -7,6 +7,7 @@ import 'downloads_screen.dart';
 import 'notifications_screen.dart';
 import 'help_support_screen.dart';
 import 'about_screen.dart';
+import 'artist_upload_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,12 +16,15 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
+
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
         title: const Text(
           'Profile',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -37,11 +41,13 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+
       body: ListView(
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 30),
         children: [
           const SizedBox(height: 10),
 
+          // PROFILE HEADER
           Center(
             child: Column(
               children: [
@@ -58,7 +64,9 @@ class ProfileScreen extends StatelessWidget {
                     color: Colors.white70,
                   ),
                 ),
+
                 const SizedBox(height: 14),
+
                 const Text(
                   'SERENG User',
                   style: TextStyle(
@@ -66,7 +74,9 @@ class ProfileScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 5),
+
                 const Text(
                   'Music lover',
                   style: TextStyle(
@@ -74,7 +84,9 @@ class ProfileScreen extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
+
                 const SizedBox(height: 18),
+
                 SizedBox(
                   width: double.infinity,
                   height: 46,
@@ -97,6 +109,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 28),
 
+          // YOUR MUSIC
           const Text(
             'Your Music',
             style: TextStyle(
@@ -149,8 +162,24 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
 
+          // ARTIST STUDIO
+          ProfileMenuTile(
+            icon: Icons.music_note_rounded,
+            title: 'Artist Studio',
+            subtitle: 'Upload and manage your songs',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ArtistUploadScreen(),
+                ),
+              );
+            },
+          ),
+
           const SizedBox(height: 22),
 
+          // SUPPORT
           const Text(
             'Support',
             style: TextStyle(
@@ -191,6 +220,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // LOGOUT
           ProfileMenuTile(
             icon: Icons.logout_rounded,
             title: 'Logout',
@@ -198,7 +228,9 @@ class ProfileScreen extends StatelessWidget {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Logout will be connected later'),
+                  content: Text(
+                    'Logout will be connected later',
+                  ),
                 ),
               );
             },
@@ -236,6 +268,7 @@ class ProfileMenuTile extends StatelessWidget {
           horizontal: 15,
           vertical: 5,
         ),
+
         leading: Container(
           width: 44,
           height: 44,
@@ -248,6 +281,7 @@ class ProfileMenuTile extends StatelessWidget {
             color: Colors.white,
           ),
         ),
+
         title: Text(
           title,
           style: const TextStyle(
@@ -255,6 +289,7 @@ class ProfileMenuTile extends StatelessWidget {
             fontSize: 14,
           ),
         ),
+
         subtitle: Text(
           subtitle,
           style: const TextStyle(
@@ -262,10 +297,12 @@ class ProfileMenuTile extends StatelessWidget {
             fontSize: 12,
           ),
         ),
+
         trailing: const Icon(
           Icons.chevron_right_rounded,
           color: Colors.white38,
         ),
+
         onTap: onTap,
       ),
     );
