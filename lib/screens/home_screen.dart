@@ -13,11 +13,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
-
         title: const Text(
           'SERENG',
           style: TextStyle(
@@ -26,7 +24,6 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-
         actions: [
           IconButton(
             onPressed: () {
@@ -39,7 +36,6 @@ class HomeScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.search),
           ),
-
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -55,7 +51,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           16,
@@ -63,9 +58,7 @@ class HomeScreen extends StatelessWidget {
           16,
           35,
         ),
-
         children: [
-
           const Text(
             'Good evening',
             style: TextStyle(
@@ -73,9 +66,7 @@ class HomeScreen extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-
           const SizedBox(height: 5),
-
           const Text(
             'Listen to your vibe.',
             style: TextStyle(
@@ -83,95 +74,69 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 22),
 
           // FEATURED PLAYLIST
-
           Container(
             height: 195,
             padding: const EdgeInsets.all(20),
-
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-
                 colors: [
                   Color(0xFF7C3AED),
                   Color(0xFFEC4899),
                 ],
               ),
             ),
-
             child: Row(
               children: [
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
-
                     mainAxisAlignment:
                         MainAxisAlignment.center,
-
                     children: [
-
                       const Text(
                         'FEATURED PLAYLIST',
-
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight:
-                              FontWeight.bold,
-
+                          fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
                       const Text(
                         'Santhali Hits',
-
                         style: TextStyle(
                           fontSize: 27,
-                          fontWeight:
-                              FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 5),
-
                       const Text(
                         'Best songs for your mood',
-
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       ElevatedButton.icon(
                         onPressed: () {},
-
                         icon: const Icon(
                           Icons.play_arrow,
                         ),
-
                         label: const Text(
                           'Play Now',
                         ),
-
                         style:
                             ElevatedButton.styleFrom(
                           backgroundColor:
                               Colors.white,
-
                           foregroundColor:
                               Colors.black,
                         ),
@@ -179,7 +144,6 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const Icon(
                   Icons.music_note_rounded,
                   size: 80,
@@ -191,11 +155,8 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 28),
 
-          // SONG SECTION
-
           const Text(
             'Songs',
-
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -204,46 +165,61 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // FIRESTORE SONGS
-
+          // REAL FIREBASE SONGS
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('songs')
-                .where('approved', isEqualTo: true)
+                .where(
+                  'isApproved',
+                  isEqualTo: true,
+                )
                 .snapshots(),
-
             builder: (
               context,
               snapshot,
             ) {
-
               if (snapshot.hasError) {
                 return const Padding(
                   padding: EdgeInsets.all(20),
-
                   child: Text(
-                    'Something went wrong',
+                    'Unable to load songs.',
+                    style: TextStyle(
+                      color: Colors.white54,
+                    ),
                   ),
                 );
               }
 
               if (snapshot.connectionState ==
                   ConnectionState.waiting) {
-
-                return const Center(
-                  child:
-                      CircularProgressIndicator(),
+                return const Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Center(
+                    child:
+                        CircularProgressIndicator(),
+                  ),
                 );
               }
 
               if (!snapshot.hasData ||
                   snapshot.data!.docs.isEmpty) {
-
                 return const Padding(
                   padding: EdgeInsets.all(20),
-
-                  child: Text(
-                    'No songs available',
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.music_off_rounded,
+                        size: 45,
+                        color: Colors.white30,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'No approved songs yet',
+                        style: TextStyle(
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -253,34 +229,42 @@ class HomeScreen extends StatelessWidget {
 
               return ListView.builder(
                 shrinkWrap: true,
-
                 physics:
                     const NeverScrollableScrollPhysics(),
-
                 itemCount: songs.length,
-
-                itemBuilder:
-                    (context, index) {
-
-                  final song =
+                itemBuilder: (
+                  context,
+                  index,
+                ) {
+                  final data =
                       songs[index].data()
                           as Map<String, dynamic>;
 
-                  final title =
-                      song['title'] ??
+                  final String title =
+                      data['songTitle']
+                              ?.toString() ??
                           'Unknown Song';
 
-                  final artist =
-                      song['artist'] ??
+                  final String artist =
+                      data['artistName']
+                              ?.toString() ??
                           'Unknown Artist';
 
-                  final audioUrl =
-                      song['audioUrl'] ?? '';
+                  final String audioUrl =
+                      data['audioUrl']
+                              ?.toString() ??
+                          '';
+
+                  final String coverUrl =
+                      data['coverUrl']
+                              ?.toString() ??
+                          '';
 
                   return HomeSongTile(
                     title: title,
                     artist: artist,
                     audioUrl: audioUrl,
+                    coverUrl: coverUrl,
                   );
                 },
               );
@@ -297,26 +281,18 @@ class HomeScreen extends StatelessWidget {
 
           SizedBox(
             height: 125,
-
             child: ListView(
               scrollDirection:
                   Axis.horizontal,
-
               children: const [
-
                 HomeArtistCard(
-                  name:
-                      'Santhali Artist',
+                  name: 'Santhali Artist',
                 ),
-
                 HomeArtistCard(
-                  name:
-                      'SERENG Artist',
+                  name: 'SERENG Artist',
                 ),
-
                 HomeArtistCard(
-                  name:
-                      'New Artist',
+                  name: 'New Artist',
                 ),
               ],
             ),
@@ -327,12 +303,12 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-
+// ======================================================
 // SECTION TITLE
+// ======================================================
 
 class HomeSectionTitle
     extends StatelessWidget {
-
   final String title;
 
   const HomeSectionTitle({
@@ -342,166 +318,166 @@ class HomeSectionTitle
 
   @override
   Widget build(BuildContext context) {
-
     return Text(
       title,
-
       style: const TextStyle(
         fontSize: 20,
-        fontWeight:
-            FontWeight.bold,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
 }
 
-
+// ======================================================
 // SONG TILE
+// ======================================================
 
 class HomeSongTile
     extends StatelessWidget {
-
   final String title;
   final String artist;
   final String audioUrl;
+  final String coverUrl;
 
   const HomeSongTile({
     super.key,
-
     required this.title,
     required this.artist,
     required this.audioUrl,
+    required this.coverUrl,
   });
+
+  void openPlayer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MusicPlayerScreen(
+          songTitle: title,
+          artistName: artist,
+          audioUrl: audioUrl,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return Container(
-      margin:
-          const EdgeInsets.only(
-        bottom: 10,
-      ),
-
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
-
-      decoration: BoxDecoration(
-        color:
-            const Color(0xFF15151B),
-
-        borderRadius:
-            BorderRadius.circular(14),
-      ),
-
-      child: Row(
-        children: [
-
-          Container(
-            width: 52,
-            height: 52,
-
-            decoration: BoxDecoration(
-              color:
-                  const Color(0xFF24242D),
-
-              borderRadius:
-                  BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: () {
+        openPlayer(context);
+      },
+      child: Container(
+        margin:
+            const EdgeInsets.only(bottom: 10),
+        padding:
+            const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF15151B),
+          borderRadius:
+              BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            // COVER
+            Container(
+              width: 52,
+              height: 52,
+              clipBehavior:
+                  Clip.antiAlias,
+              decoration: BoxDecoration(
+                color:
+                    const Color(0xFF24242D),
+                borderRadius:
+                    BorderRadius.circular(10),
+              ),
+              child: coverUrl.isNotEmpty
+                  ? Image.network(
+                      coverUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (
+                        context,
+                        error,
+                        stackTrace,
+                      ) {
+                        return const Icon(
+                          Icons.music_note,
+                          color:
+                              Colors.white70,
+                        );
+                      },
+                    )
+                  : const Icon(
+                      Icons.music_note,
+                      color:
+                          Colors.white70,
+                    ),
             ),
 
-            child: const Icon(
-              Icons.music_note,
+            const SizedBox(width: 12),
 
-              color:
-                  Colors.white70,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-
-              children: [
-
-                Text(
-                  title,
-
-                  maxLines: 1,
-
-                  overflow:
-                      TextOverflow.ellipsis,
-
-                  style: const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
+            // TITLE + ARTIST
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
+                    style:
+                        const TextStyle(
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
                   ),
-                ),
-
-                const SizedBox(
-                  height: 4,
-                ),
-
-                Text(
-                  artist,
-
-                  style: const TextStyle(
-                    color:
-                        Colors.white54,
-
-                    fontSize: 12,
+                  const SizedBox(
+                    height: 4,
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          IconButton(
-            onPressed: () {
-
-              Navigator.push(
-                context,
-
-                MaterialPageRoute(
-                  builder: (_) =>
-                      MusicPlayerScreen(
-
-                    songTitle:
-                        title,
-
-                    artistName:
-                        artist,
-
-                    audioUrl:
-                        audioUrl,
+                  Text(
+                    artist,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
+                    style:
+                        const TextStyle(
+                      color:
+                          Colors.white54,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              );
-            },
-
-            icon: const Icon(
-              Icons
-                  .play_circle_fill_rounded,
-
-              size: 32,
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // PLAY
+            IconButton(
+              onPressed: () {
+                openPlayer(context);
+              },
+              icon: const Icon(
+                Icons
+                    .play_circle_fill_rounded,
+                size: 32,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-
+// ======================================================
 // ARTIST CARD
+// ======================================================
 
 class HomeArtistCard
     extends StatelessWidget {
-
   final String name;
 
   const HomeArtistCard({
@@ -511,71 +487,58 @@ class HomeArtistCard
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: () {
-
         Navigator.push(
           context,
-
           MaterialPageRoute(
             builder: (_) =>
-                const ArtistProfileScreen(),
+                ArtistProfileScreen(
+              artistName: name,
+            ),
           ),
         );
       },
-
       child: Container(
-        width: 105,
-
+        width: 110,
         margin:
             const EdgeInsets.only(
-          right: 14,
+          right: 12,
         ),
-
         child: Column(
           children: [
-
             Container(
-              width: 82,
-              height: 82,
-
+              width: 78,
+              height: 78,
               decoration:
                   const BoxDecoration(
-                shape:
-                    BoxShape.circle,
-
-                color:
-                    Color(0xFF24242D),
+                shape: BoxShape.circle,
+                gradient:
+                    LinearGradient(
+                  colors: [
+                    Color(0xFF7C3AED),
+                    Color(0xFFEC4899),
+                  ],
+                ),
               ),
-
               child: const Icon(
                 Icons.person,
-
-                size: 42,
-
-                color:
-                    Colors.white54,
+                size: 38,
+                color: Colors.white,
               ),
             ),
-
-            const SizedBox(
-              height: 8,
-            ),
-
+            const SizedBox(height: 8),
             Text(
               name,
-
               maxLines: 1,
-
               overflow:
                   TextOverflow.ellipsis,
-
-              textAlign:
-                  TextAlign.center,
-
-              style: const TextStyle(
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(
                 fontSize: 12,
+                color:
+                    Colors.white70,
               ),
             ),
           ],
