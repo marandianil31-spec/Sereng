@@ -13,9 +13,15 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
+
+      // ==================================================
+      // APP BAR
+      // ==================================================
+
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
+
         title: const Text(
           'SERENG',
           style: TextStyle(
@@ -24,6 +30,7 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
+
         actions: [
           IconButton(
             onPressed: () {
@@ -36,12 +43,14 @@ class HomeScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.search),
           ),
+
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
+                  builder: (_) =>
+                      const NotificationsScreen(),
                 ),
               );
             },
@@ -51,6 +60,11 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+
+      // ==================================================
+      // HOME BODY
+      // ==================================================
+
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           16,
@@ -58,6 +72,7 @@ class HomeScreen extends StatelessWidget {
           16,
           35,
         ),
+
         children: [
           const Text(
             'Good evening',
@@ -66,7 +81,9 @@ class HomeScreen extends StatelessWidget {
               fontSize: 14,
             ),
           ),
+
           const SizedBox(height: 5),
+
           const Text(
             'Listen to your vibe.',
             style: TextStyle(
@@ -74,14 +91,20 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 22),
 
+          // ==================================================
           // FEATURED PLAYLIST
+          // ==================================================
+
           Container(
             height: 195,
             padding: const EdgeInsets.all(20),
+
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
+
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -91,32 +114,41 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+
             child: Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
+
                     mainAxisAlignment:
                         MainAxisAlignment.center,
+
                     children: [
                       const Text(
                         'FEATURED PLAYLIST',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontWeight:
+                              FontWeight.bold,
                           letterSpacing: 1.5,
                         ),
                       ),
+
                       const SizedBox(height: 10),
+
                       const Text(
                         'Santhali Hits',
                         style: TextStyle(
                           fontSize: 27,
-                          fontWeight: FontWeight.bold,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
                       ),
+
                       const SizedBox(height: 5),
+
                       const Text(
                         'Best songs for your mood',
                         style: TextStyle(
@@ -124,7 +156,9 @@ class HomeScreen extends StatelessWidget {
                           fontSize: 13,
                         ),
                       ),
+
                       const SizedBox(height: 12),
+
                       ElevatedButton.icon(
                         onPressed: () {},
                         icon: const Icon(
@@ -144,6 +178,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 const Icon(
                   Icons.music_note_rounded,
                   size: 80,
@@ -155,6 +190,10 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 28),
 
+          // ==================================================
+          // SONGS
+          // ==================================================
+
           const Text(
             'Songs',
             style: TextStyle(
@@ -165,7 +204,6 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // REAL FIREBASE SONGS
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('songs')
@@ -174,13 +212,16 @@ class HomeScreen extends StatelessWidget {
                   isEqualTo: true,
                 )
                 .snapshots(),
+
             builder: (
               context,
               snapshot,
             ) {
+              // ERROR
               if (snapshot.hasError) {
                 return const Padding(
-                  padding: EdgeInsets.all(20),
+                  padding:
+                      EdgeInsets.all(20),
                   child: Text(
                     'Unable to load songs.',
                     style: TextStyle(
@@ -190,10 +231,12 @@ class HomeScreen extends StatelessWidget {
                 );
               }
 
+              // LOADING
               if (snapshot.connectionState ==
                   ConnectionState.waiting) {
                 return const Padding(
-                  padding: EdgeInsets.all(30),
+                  padding:
+                      EdgeInsets.all(30),
                   child: Center(
                     child:
                         CircularProgressIndicator(),
@@ -201,10 +244,13 @@ class HomeScreen extends StatelessWidget {
                 );
               }
 
+              // EMPTY
               if (!snapshot.hasData ||
                   snapshot.data!.docs.isEmpty) {
                 return const Padding(
-                  padding: EdgeInsets.all(20),
+                  padding:
+                      EdgeInsets.all(20),
+
                   child: Column(
                     children: [
                       Icon(
@@ -212,11 +258,14 @@ class HomeScreen extends StatelessWidget {
                         size: 45,
                         color: Colors.white30,
                       ),
+
                       SizedBox(height: 10),
+
                       Text(
                         'No approved songs yet',
                         style: TextStyle(
-                          color: Colors.white54,
+                          color:
+                              Colors.white54,
                         ),
                       ),
                     ],
@@ -229,9 +278,12 @@ class HomeScreen extends StatelessWidget {
 
               return ListView.builder(
                 shrinkWrap: true,
+
                 physics:
                     const NeverScrollableScrollPhysics(),
+
                 itemCount: songs.length,
+
                 itemBuilder: (
                   context,
                   index,
@@ -273,6 +325,10 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
+          // ==================================================
+          // POPULAR ARTISTS
+          // ==================================================
+
           const HomeSectionTitle(
             title: 'Popular Artists',
           ),
@@ -281,16 +337,20 @@ class HomeScreen extends StatelessWidget {
 
           SizedBox(
             height: 125,
+
             child: ListView(
               scrollDirection:
                   Axis.horizontal,
+
               children: const [
                 HomeArtistCard(
                   name: 'Santhali Artist',
                 ),
+
                 HomeArtistCard(
                   name: 'SERENG Artist',
                 ),
+
                 HomeArtistCard(
                   name: 'New Artist',
                 ),
@@ -347,7 +407,9 @@ class HomeSongTile
     required this.coverUrl,
   });
 
-  void openPlayer(BuildContext context) {
+  void openPlayer(
+    BuildContext context,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -361,42 +423,58 @@ class HomeSongTile
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return GestureDetector(
       onTap: () {
         openPlayer(context);
       },
+
       child: Container(
         margin:
-            const EdgeInsets.only(bottom: 10),
+            const EdgeInsets.only(
+          bottom: 10,
+        ),
+
         padding:
             const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 10,
         ),
+
         decoration: BoxDecoration(
           color: const Color(0xFF15151B),
           borderRadius:
               BorderRadius.circular(14),
         ),
+
         child: Row(
           children: [
+            // ==================================================
             // COVER
+            // ==================================================
+
             Container(
               width: 52,
               height: 52,
+
               clipBehavior:
                   Clip.antiAlias,
+
               decoration: BoxDecoration(
                 color:
                     const Color(0xFF24242D),
+
                 borderRadius:
                     BorderRadius.circular(10),
               ),
+
               child: coverUrl.isNotEmpty
                   ? Image.network(
                       coverUrl,
                       fit: BoxFit.cover,
+
                       errorBuilder: (
                         context,
                         error,
@@ -418,31 +496,39 @@ class HomeSongTile
 
             const SizedBox(width: 12),
 
+            // ==================================================
             // TITLE + ARTIST
+            // ==================================================
+
             Expanded(
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
+
                 children: [
                   Text(
                     title,
                     maxLines: 1,
                     overflow:
                         TextOverflow.ellipsis,
+
                     style:
                         const TextStyle(
                       fontWeight:
                           FontWeight.bold,
                     ),
                   ),
+
                   const SizedBox(
                     height: 4,
                   ),
+
                   Text(
                     artist,
                     maxLines: 1,
                     overflow:
                         TextOverflow.ellipsis,
+
                     style:
                         const TextStyle(
                       color:
@@ -454,11 +540,15 @@ class HomeSongTile
               ),
             ),
 
-            // PLAY
+            // ==================================================
+            // PLAY BUTTON
+            // ==================================================
+
             IconButton(
               onPressed: () {
                 openPlayer(context);
               },
+
               icon: const Icon(
                 Icons
                     .play_circle_fill_rounded,
@@ -486,33 +576,40 @@ class HomeArtistCard
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
+            // ArtistProfileScreen में
+            // अभी artistName parameter नहीं है।
             builder: (_) =>
-                ArtistProfileScreen(
-              artistName: name,
-            ),
+                const ArtistProfileScreen(),
           ),
         );
       },
+
       child: Container(
         width: 110,
+
         margin:
             const EdgeInsets.only(
           right: 12,
         ),
+
         child: Column(
           children: [
             Container(
               width: 78,
               height: 78,
+
               decoration:
                   const BoxDecoration(
                 shape: BoxShape.circle,
+
                 gradient:
                     LinearGradient(
                   colors: [
@@ -521,19 +618,25 @@ class HomeArtistCard
                   ],
                 ),
               ),
+
               child: const Icon(
                 Icons.person,
                 size: 38,
                 color: Colors.white,
               ),
             ),
+
             const SizedBox(height: 8),
+
             Text(
               name,
               maxLines: 1,
               overflow:
                   TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+
+              textAlign:
+                  TextAlign.center,
+
               style:
                   const TextStyle(
                 fontSize: 12,
