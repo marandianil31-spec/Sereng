@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'music_player_screen.dart';
 
 class QueueScreen extends StatefulWidget {
@@ -36,7 +35,7 @@ class _QueueScreenState extends State<QueueScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MusicPlayerScreen(
+        builder: (_) => MusicPlayerScreen(
           songTitle: song['title']!,
           artistName: song['artist']!,
         ),
@@ -48,7 +47,6 @@ class _QueueScreenState extends State<QueueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B0F),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
@@ -75,7 +73,6 @@ class _QueueScreenState extends State<QueueScreen> {
             ),
         ],
       ),
-
       body: queue.isEmpty
           ? const Center(
               child: Column(
@@ -117,64 +114,58 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                     ),
                     itemCount: queue.length,
-
                     onReorderItem: (oldIndex, newIndex) {
                       setState(() {
                         final item = queue.removeAt(oldIndex);
                         queue.insert(newIndex, item);
                       });
                     },
-
                     itemBuilder: (context, index) {
                       final song = queue[index];
 
-                      return GestureDetector(
+                      return Container(
                         key: ValueKey(
                           '${song['title']}_$index',
                         ),
-                        onTap: () {
-                          openPlayer(context, song);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF141419),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.drag_handle_rounded,
-                                color: Colors.white30,
+                        margin: const EdgeInsets.only(
+                          bottom: 8,
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF141419),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.drag_handle_rounded,
+                              color: Colors.white30,
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF292231),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-
-                              const SizedBox(width: 8),
-
-                              Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF292231),
-                                  borderRadius:
-                                      BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.music_note_rounded,
-                                  color: Colors.white70,
-                                ),
+                              child: const Icon(
+                                Icons.music_note_rounded,
+                                color: Colors.white70,
                               ),
-
-                              const SizedBox(width: 13),
-
-                              Expanded(
+                            ),
+                            const SizedBox(width: 13),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  openPlayer(context, song);
+                                },
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
@@ -188,9 +179,7 @@ class _QueueScreenState extends State<QueueScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
                                     const SizedBox(height: 4),
-
                                     Text(
                                       song['artist']!,
                                       maxLines: 1,
@@ -204,30 +193,28 @@ class _QueueScreenState extends State<QueueScreen> {
                                   ],
                                 ),
                               ),
-
-                              IconButton(
-                                onPressed: () {
-                                  openPlayer(context, song);
-                                },
-                                icon: const Icon(
-                                  Icons.play_circle_outline,
-                                  size: 30,
-                                ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                openPlayer(context, song);
+                              },
+                              icon: const Icon(
+                                Icons.play_circle_outline,
+                                size: 30,
                               ),
-
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    queue.removeAt(index);
-                                  });
-                                },
-                                icon: const Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white54,
-                                ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  queue.removeAt(index);
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white54,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },
