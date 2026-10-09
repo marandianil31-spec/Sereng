@@ -45,19 +45,45 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     });
 
     try {
-      // Request/check music permission.
+      debugPrint('LOCAL MUSIC: Checking permission...');
+
+      // Check current permission status.
       final bool permission =
           await _audioQuery
-              .checkAndRequest(
-                retryRequest: true,
-              )
+              .permissionsStatus()
               .timeout(
-                const Duration(seconds: 15),
+                const Duration(seconds: 10),
               );
+
+      debugPrint(
+        'LOCAL MUSIC: Permission status = $permission',
+      );
+
+      bool hasPermission = permission;
+
+      // Request permission if it has not been granted.
+      if (!hasPermission) {
+        debugPrint(
+          'LOCAL MUSIC: Requesting permission...',
+        );
+
+        hasPermission =
+            await _audioQuery
+                .permissionsRequest(
+                  retryRequest: true,
+                )
+                .timeout(
+                  const Duration(seconds: 15),
+                );
+
+        debugPrint(
+          'LOCAL MUSIC: Permission granted = $hasPermission',
+        );
+      }
 
       if (!mounted) return;
 
-      if (!permission) {
+      if (!hasPermission) {
         setState(() {
           loading = false;
           permissionDenied = true;
@@ -65,7 +91,9 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
         return;
       }
 
-      // Query songs stored on the phone.
+      // Query songs from phone storage.
+      debugPrint('LOCAL MUSIC: Querying songs...');
+
       final List<SongModel> result =
           await _audioQuery
               .querySongs(
@@ -78,15 +106,20 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                 const Duration(seconds: 20),
               );
 
+      debugPrint(
+        'LOCAL MUSIC: Songs found = ${result.length}',
+      );
+
       if (!mounted) return;
 
       setState(() {
         songs = result;
         loading = false;
         permissionDenied = false;
+        errorMessage = null;
       });
-    } catch (e, stackTrace) {
-      debugPrint('Local music error: $e');
+    } on TimeoutException catch (e, stackTrace) {
+      debugPrint('LOCAL MUSIC TIMEOUT: $e');
       debugPrintStack(stackTrace: stackTrace);
 
       if (!mounted) return;
@@ -94,9 +127,20 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       setState(() {
         loading = false;
         songs = [];
-        errorMessage = e is TimeoutException
-            ? 'Music loading timed out. Please try again.'
-            : 'Unable to load music. Please try again.';
+        errorMessage =
+            'Music query timed out. Please try again.';
+      });
+    } catch (e, stackTrace) {
+      debugPrint('LOCAL MUSIC ERROR: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        loading = false;
+        songs = [];
+        errorMessage =
+            'Unable to load music. Please try again.';
       });
     }
   }
@@ -134,10 +178,12 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       if (!mounted) return;
 
       setState(() {
+        playingId = null;
         isPlaying = false;
       });
-    } catch (e) {
-      debugPrint('Play error: $e');
+    } catch (e, stackTrace) {
+      debugPrint('LOCAL MUSIC PLAY ERROR: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       if (!mounted) return;
 
@@ -165,7 +211,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
         isPlaying = false;
       });
     } catch (e) {
-      debugPrint('Stop error: $e');
+      debugPrint('LOCAL MUSIC STOP ERROR: $e');
       showMessage('Unable to stop playback.');
     }
   }
@@ -206,14 +252,12 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0F),
         elevation: 0,
-
         title: const Text(
           'Local Music',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
-
         actions: [
           IconButton(
             onPressed: loading ? null : loadSongs,
@@ -233,7 +277,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
                   Text(
-                    'Loading your music...',
+                    'Checking music access...',
                     style: TextStyle(
                       color: Colors.white70,
                     ),
@@ -274,7 +318,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                 ),
                               ),
                             ),
-
                             Expanded(
                               child: ListView.builder(
                                 padding:
@@ -300,7 +343,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                         const EdgeInsets.only(
                                       bottom: 8,
                                     ),
-
                                     decoration: BoxDecoration(
                                       color: const Color(
                                         0xFF141419,
@@ -310,7 +352,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                         15,
                                       ),
                                     ),
-
                                     child: ListTile(
                                       contentPadding:
                                           const EdgeInsets
@@ -318,7 +359,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                         horizontal: 12,
                                         vertical: 4,
                                       ),
-
                                       leading: Container(
                                         width: 52,
                                         height: 52,
@@ -337,7 +377,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                           color: Colors.white70,
                                         ),
                                       ),
-
                                       title: Text(
                                         song.title,
                                         maxLines: 1,
@@ -348,7 +387,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                               FontWeight.bold,
                                         ),
                                       ),
-
                                       subtitle: Text(
                                         artist,
                                         maxLines: 1,
@@ -359,7 +397,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                           fontSize: 12,
                                         ),
                                       ),
-
                                       trailing: IconButton(
                                         onPressed: () {
                                           if (selected) {
@@ -377,7 +414,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                           size: 34,
                                         ),
                                       ),
-
                                       onTap: () {
                                         if (selected) {
                                           stopSong();
@@ -420,9 +456,7 @@ class _PermissionDeniedView extends StatelessWidget {
               size: 70,
               color: Colors.white30,
             ),
-
             const SizedBox(height: 16),
-
             const Text(
               'Music permission required',
               textAlign: TextAlign.center,
@@ -431,9 +465,7 @@ class _PermissionDeniedView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
               'Allow music access so SERENG can display songs stored on your phone.',
               textAlign: TextAlign.center,
@@ -441,9 +473,7 @@ class _PermissionDeniedView extends StatelessWidget {
                 color: Colors.white54,
               ),
             ),
-
             const SizedBox(height: 20),
-
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(
@@ -484,9 +514,7 @@ class _EmptyMusicView extends StatelessWidget {
               size: 70,
               color: Colors.white30,
             ),
-
             const SizedBox(height: 16),
-
             const Text(
               'No local songs found',
               textAlign: TextAlign.center,
@@ -495,9 +523,7 @@ class _EmptyMusicView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
               'Make sure your phone contains MP3 or other audio files, then refresh.',
               textAlign: TextAlign.center,
@@ -505,9 +531,7 @@ class _EmptyMusicView extends StatelessWidget {
                 color: Colors.white54,
               ),
             ),
-
             const SizedBox(height: 20),
-
             ElevatedButton.icon(
               onPressed: onRefresh,
               icon: const Icon(
@@ -550,9 +574,7 @@ class _ErrorView extends StatelessWidget {
               size: 64,
               color: Colors.orangeAccent,
             ),
-
             const SizedBox(height: 16),
-
             const Text(
               'Unable to load music',
               textAlign: TextAlign.center,
@@ -561,9 +583,7 @@ class _ErrorView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               message,
               textAlign: TextAlign.center,
@@ -571,9 +591,7 @@ class _ErrorView extends StatelessWidget {
                 color: Colors.white54,
               ),
             ),
-
             const SizedBox(height: 20),
-
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(
