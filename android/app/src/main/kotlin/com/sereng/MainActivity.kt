@@ -61,10 +61,11 @@ class MainActivity : FlutterActivity() {
             MediaStore.Audio.Media.IS_MUSIC
         )
 
-        // Notification tones and other audio files are excluded
-        // when Android does not classify them as music.
+        // Include files marked as music and audio files
+        // at least 60 seconds long.
         val selection =
-            "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+            "(${MediaStore.Audio.Media.IS_MUSIC} != 0) OR " +
+            "(${MediaStore.Audio.Media.DURATION} >= 60000)"
 
         val sortOrder =
             "${MediaStore.Audio.Media.TITLE} COLLATE NOCASE ASC"
@@ -106,24 +107,27 @@ class MainActivity : FlutterActivity() {
 
                 val title =
                     cursor.getString(titleIndex)
+                        ?.takeIf { it.isNotBlank() }
                         ?: cursor.getString(nameIndex)
                         ?: "Unknown Song"
 
                 val artist =
                     cursor.getString(artistIndex)
-                        ?.takeIf { it.isNotBlank() && it != "<unknown>" }
+                        ?.takeIf {
+                            it.isNotBlank() && it != "<unknown>"
+                        }
                         ?: "Unknown Artist"
 
                 val album =
                     cursor.getString(albumIndex)
+                        ?.takeIf { it.isNotBlank() }
                         ?: "Unknown Album"
 
                 val duration =
                     cursor.getLong(durationIndex)
 
                 val fileName =
-                    cursor.getString(nameIndex)
-                        ?: title
+                    cursor.getString(nameIndex) ?: title
 
                 val uri = ContentUris.withAppendedId(
                     collection,
