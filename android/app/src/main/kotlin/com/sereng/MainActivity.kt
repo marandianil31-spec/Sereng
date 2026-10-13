@@ -21,18 +21,20 @@ class MainActivity : FlutterActivity() {
             CHANNEL
         ).setMethodCallHandler { call, result ->
 
-            if (call.method == "getSongs") {
-                try {
-                    result.success(getSongs())
-                } catch (e: Exception) {
-                    result.error(
-                        "MUSIC_QUERY_ERROR",
-                        e.message,
-                        null
-                    )
+            when (call.method) {
+                "getSongs" -> {
+                    try {
+                        result.success(getSongs())
+                    } catch (e: Exception) {
+                        result.error(
+                            "MUSIC_QUERY_ERROR",
+                            e.message ?: "Unable to query music",
+                            null
+                        )
+                    }
                 }
-            } else {
-                result.notImplemented()
+
+                else -> result.notImplemented()
             }
         }
     }
@@ -53,39 +55,75 @@ class MainActivity : FlutterActivity() {
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DISPLAY_NAME,
+            MediaStore.Audio.Media.IS_MUSIC
         )
+
+        // Notification tones and other audio files are excluded
+        // when Android does not classify them as music.
+        val selection =
+            "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+
+        val sortOrder =
+            "${MediaStore.Audio.Media.TITLE} COLLATE NOCASE ASC"
 
         contentResolver.query(
             collection,
             projection,
+            selection,
             null,
-            null,
-            "${MediaStore.Audio.Media.TITLE} ASC"
+            sortOrder
         )?.use { cursor ->
 
-            val idIndex =
-                cursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Media._ID
-                )
+            val idIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media._ID
+            )
 
-            val titleIndex =
-                cursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Media.TITLE
-                )
+            val titleIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.TITLE
+            )
 
-            val artistIndex =
-                cursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Media.ARTIST
-                )
+            val artistIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.ARTIST
+            )
 
-            val durationIndex =
-                cursor.getColumnIndexOrThrow(
-                    MediaStore.Audio.Media.DURATION
-                )
+            val albumIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.ALBUM
+            )
+
+            val durationIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.DURATION
+            )
+
+            val nameIndex = cursor.getColumnIndexOrThrow(
+                MediaStore.Audio.Media.DISPLAY_NAME
+            )
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idIndex)
+
+                val title =
+                    cursor.getString(titleIndex)
+                        ?: cursor.getString(nameIndex)
+                        ?: "Unknown Song"
+
+                val artist =
+                    cursor.getString(artistIndex)
+                        ?.takeIf { it.isNotBlank() && it != "<unknown>" }
+                        ?: "Unknown Artist"
+
+                val album =
+                    cursor.getString(albumIndex)
+                        ?: "Unknown Album"
+
+                val duration =
+                    cursor.getLong(durationIndex)
+
+                val fileName =
+                    cursor.getString(nameIndex)
+                        ?: title
 
                 val uri = ContentUris.withAppendedId(
                     collection,
@@ -95,15 +133,11 @@ class MainActivity : FlutterActivity() {
                 songs.add(
                     mapOf(
                         "id" to id,
-                        "title" to (
-                            cursor.getString(titleIndex)
-                                ?: "Unknown Title"
-                        ),
-                        "artist" to (
-                            cursor.getString(artistIndex)
-                                ?: "Unknown Artist"
-                        ),
-                        "duration" to cursor.getLong(durationIndex),
+                        "title" to title,
+                        "artist" to artist,
+                        "album" to album,
+                        "duration" to duration,
+                        "name" to fileName,
                         "uri" to uri
                     )
                 )
