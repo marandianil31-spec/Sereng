@@ -1,526 +1,252 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalMusicScreen extends StatefulWidget {
   const LocalMusicScreen({super.key});
 
   @override
-  State<LocalMusicScreen> createState() =>
-      _LocalMusicScreenState();
+  State<LocalMusicScreen> createState() => _LocalMusicScreenState();
 }
 
 class _LocalMusicScreenState extends State<LocalMusicScreen> {
-  static const MethodChannel _channel =
-      MethodChannel('sereng/local_music');
-
+  static const MethodChannel _channel = MethodChannel('sereng/local_music');
   final AudioPlayer _player = AudioPlayer();
-  final TextEditingController _searchController =
-      TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   List<Map<String, dynamic>> songs = [];
-
+  List<Map<String, dynamic>> filteredSongs = [];
+  Set<String> favorites = {};
   bool loading = true;
   bool isPlaying = false;
-
-  String? errorMessage;
-  String? currentUri;
-  String? currentTitle;
-
+  bool shuffleEnabled = false;
+  bool repeatEnabled = false;
+  bool showFavoritesOnly = false;
   int currentIndex = -1;
+  Duration position = Duration.zero;
+  Duration duration = Duration.zero;
+  String? errorMessage;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration?>? _durationSubscription;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
 
   @override
   void initState() {
     super.initState();
-
-    _player.playerStateStream.listen((state) {
+    _loadFavorites();
+    loadSongs();
+    _positionSubscription = _player.positionStream.listen((value) {
+      if (mounted) setState(() => position = value);
+    });
+    _durationSubscription = _player.durationStream.listen((value) {
+      if (mounted) setState(() => duration = value ?? Duration.zero);
+    });
+    _playerStateSubscription = _player.playerStateStream.listen((state) {
       if (!mounted) return;
-
-      setState(() {
-        isPlaying = state.playing;
-      });
-
+      setState(() => isPlaying = state.playing);
       if (state.processingState == ProcessingState.completed) {
-        playNext();
+        if (repeatEnabled && currentIndex >= 0) {
+          playSong(currentIndex);
+        } else {
+          playNext();
+        }
       }
     });
-
-    loadSongs();
   }
 
-  // ==========================================
-  // LOAD SONGS FROM ANDROID MEDIASTORE
-  // ==========================================
+  String _songId(Map<String, dynamic> song) =>
+      (song['id'] ?? song['uri'] ?? song['title'] ?? '').toString();
+
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => favorites = (prefs.getStringList('sereng_favorites') ?? []).toSet());
+  }
+
+  Future<void> _saveFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('sereng_favorites', favorites.toList());
+  }
 
   Future<void> loadSongs() async {
-    if (!mounted) return;
-
-    setState(() {
-      loading = true;
-      errorMessage = null;
-    });
-
+    setState(() { loading = true; errorMessage = null; });
     try {
-      final List<dynamic>? result =
-          await _channel.invokeListMethod<dynamic>('getSongs');
-
+      final result = await _channel.invokeListMethod<dynamic>('getSongs');
+      final loaded = (result ?? [])
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
       if (!mounted) return;
-
-      final List<Map<String, dynamic>> loadedSongs =
-          (result ?? [])
-              .map(
-                (song) => Map<String, dynamic>.from(song as Map),
-              )
-              .where(
-                (song) =>
-                    song['uri'] != null &&
-                    song['title'] != null,
-              )
-              .toList();
-
-      setState(() {
-        songs = loadedSongs;
-        loading = false;
-      });
+      setState(() { songs = loaded; loading = false; });
+      _applyFilter(_searchController.text);
     } on PlatformException catch (e) {
       if (!mounted) return;
-
-      setState(() {
-        loading = false;
-        errorMessage =
-            'Music scan failed: ${e.message ?? e.code}';
-      });
-    } on MissingPluginException {
+      setState(() { loading = false; errorMessage = e.message ?? 'Music load nahi hua.'; });
+    } catch (_) {
       if (!mounted) return;
-
-      setState(() {
-        loading = false;
-        errorMessage =
-            'Music service is not connected. Build and install the latest APK.';
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        loading = false;
-        errorMessage = 'Unable to load songs: $e';
-      });
+      setState(() { loading = false; errorMessage = 'Music load nahi hua. Permission check karein.'; });
     }
   }
-
-  // ==========================================
-  // PLAY SONG
-  // ==========================================
 
   Future<void> playSong(int index) async {
     if (index < 0 || index >= songs.length) return;
-
-    final song = songs[index];
-    final uri = song['uri']?.toString();
-
-    if (uri == null || uri.isEmpty) {
-      showMessage('Song URI is unavailable.');
-      return;
-    }
-
+    final uri = songs[index]['uri']?.toString();
+    if (uri == null || uri.isEmpty) { _message('Song ka URI nahi mila.'); return; }
     try {
-      await _player.stop();
-
-      await _player.setAudioSource(
-        AudioSource.uri(Uri.parse(uri)),
-      );
-
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(uri)));
       if (!mounted) return;
-
-      setState(() {
-        currentIndex = index;
-        currentUri = uri;
-        currentTitle = song['title']?.toString() ?? 'Unknown Song';
-      });
-
+      setState(() { currentIndex = index; position = Duration.zero; duration = Duration.zero; });
       await _player.play();
-    } catch (e) {
-      showMessage('Unable to play this song.');
-      debugPrint('LOCAL PLAY ERROR: $e');
+    } catch (_) {
+      _message('Song play nahi hua. Dusra song try karein.');
     }
   }
-
-  // ==========================================
-  // PLAY / PAUSE
-  // ==========================================
 
   Future<void> togglePlayback() async {
-    try {
-      if (_player.playing) {
-        await _player.pause();
-      } else if (currentUri != null) {
-        await _player.play();
-      } else if (songs.isNotEmpty) {
-        await playSong(0);
-      }
-    } catch (e) {
-      debugPrint('PLAYBACK ERROR: $e');
-      showMessage('Playback failed.');
+    if (currentIndex == -1) {
+      if (filteredSongs.isNotEmpty) await playSong(songs.indexOf(filteredSongs.first));
+    } else if (_player.playing) {
+      await _player.pause();
+    } else {
+      await _player.play();
     }
   }
-
-  // ==========================================
-  // NEXT SONG
-  // ==========================================
 
   Future<void> playNext() async {
     if (songs.isEmpty) return;
-
-    final nextIndex = currentIndex + 1;
-
-    if (nextIndex < songs.length) {
-      await playSong(nextIndex);
+    if (shuffleEnabled && songs.length > 1) {
+      final choices = List<int>.generate(songs.length, (i) => i)..remove(currentIndex);
+      choices.shuffle();
+      await playSong(choices.first);
+    } else if (currentIndex + 1 < songs.length) {
+      await playSong(currentIndex + 1);
+    } else if (repeatEnabled) {
+      await playSong(0);
     } else {
-      showMessage('You have reached the last song.');
+      await _player.pause();
     }
   }
-
-  // ==========================================
-  // PREVIOUS SONG
-  // ==========================================
 
   Future<void> playPrevious() async {
     if (songs.isEmpty) return;
-
-    if (currentIndex > 0) {
-      await playSong(currentIndex - 1);
-    } else {
-      showMessage('This is the first song.');
-    }
+    if (position.inSeconds > 3) { await _player.seek(Duration.zero); return; }
+    await playSong(currentIndex > 0 ? currentIndex - 1 : songs.length - 1);
   }
 
-  // ==========================================
-  // SEARCH
-  // ==========================================
-
-  List<Map<String, dynamic>> get filteredSongs {
-    final query = _searchController.text.trim().toLowerCase();
-
-    if (query.isEmpty) return songs;
-
-    return songs.where((song) {
-      final title = (song['title'] ?? '')
-          .toString()
-          .toLowerCase();
-
-      final artist = (song['artist'] ?? '')
-          .toString()
-          .toLowerCase();
-
-      return title.contains(query) || artist.contains(query);
-    }).toList();
+  Future<void> toggleFavorite(Map<String, dynamic> song) async {
+    final id = _songId(song);
+    if (id.isEmpty) return;
+    setState(() { favorites.contains(id) ? favorites.remove(id) : favorites.add(id); });
+    await _saveFavorites();
+    _applyFilter(_searchController.text);
   }
 
-  // ==========================================
-  // MESSAGE
-  // ==========================================
+  void _applyFilter(String query) {
+    final q = query.trim().toLowerCase();
+    setState(() {
+      filteredSongs = songs.where((song) {
+        final matchesQuery = (song['title'] ?? '').toString().toLowerCase().contains(q) ||
+            (song['artist'] ?? '').toString().toLowerCase().contains(q) ||
+            (song['album'] ?? '').toString().toLowerCase().contains(q);
+        return matchesQuery && (!showFavoritesOnly || favorites.contains(_songId(song)));
+      }).toList();
+    });
+  }
 
-  void showMessage(String message) {
+  String formatDuration(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return h > 0 ? '$h:$m:$s' : '${d.inMinutes}:$s';
+  }
+
+  void _message(String text) {
     if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+  Widget _artwork({double size = 52}) => Container(
+    width: size, height: size,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      gradient: const LinearGradient(colors: [Color(0xFF673AB7), Color(0xFF00BCD4)]),
+    ),
+    child: Icon(Icons.music_note_rounded, color: Colors.white, size: size * .55),
+  );
+
+  Widget _playerPanel() {
+    if (currentIndex < 0 || currentIndex >= songs.length) return const SizedBox.shrink();
+    final song = songs[currentIndex];
+    final totalMs = duration.inMilliseconds;
+    final currentMs = position.inMilliseconds.clamp(0, totalMs > 0 ? totalMs : 0);
+    return Container(
+      margin: const EdgeInsets.all(12), padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: const Color(0xFF20202C), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Row(children: [
+          _artwork(size: 54), const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text((song['title'] ?? 'Unknown Song').toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text((song['artist'] ?? 'Unknown Artist').toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+          ])),
+          IconButton(onPressed: () => toggleFavorite(song), icon: Icon(favorites.contains(_songId(song)) ? Icons.favorite : Icons.favorite_border, color: Colors.pinkAccent)),
+        ]),
+        Slider(value: totalMs > 0 ? currentMs.toDouble() : 0, max: totalMs > 0 ? totalMs.toDouble() : 1,
+          onChanged: totalMs > 0 ? (v) => _player.seek(Duration(milliseconds: v.toInt())) : null,
+          activeColor: const Color(0xFF00E5FF), inactiveColor: Colors.white24),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(formatDuration(position), style: const TextStyle(color: Colors.white60, fontSize: 11)),
+          Text(formatDuration(duration), style: const TextStyle(color: Colors.white60, fontSize: 11)),
+        ]),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          IconButton(tooltip: 'Shuffle', onPressed: () => setState(() => shuffleEnabled = !shuffleEnabled), icon: Icon(Icons.shuffle, color: shuffleEnabled ? const Color(0xFF00E5FF) : Colors.white54)),
+          IconButton(tooltip: 'Previous', onPressed: playPrevious, icon: const Icon(Icons.skip_previous_rounded, color: Colors.white, size: 36)),
+          Container(decoration: const BoxDecoration(color: Color(0xFF00BCD4), shape: BoxShape.circle), child: IconButton(onPressed: togglePlayback, icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, color: Colors.black, size: 32))),
+          IconButton(tooltip: 'Next', onPressed: playNext, icon: const Icon(Icons.skip_next_rounded, color: Colors.white, size: 36)),
+          IconButton(tooltip: 'Repeat', onPressed: () => setState(() => repeatEnabled = !repeatEnabled), icon: Icon(Icons.repeat, color: repeatEnabled ? const Color(0xFF00E5FF) : Colors.white54)),
+        ]),
+      ]),
     );
   }
-
-  // ==========================================
-  // DISPOSE
-  // ==========================================
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _player.dispose();
-    super.dispose();
-  }
-
-  // ==========================================
-  // UI
-  // ==========================================
 
   @override
   Widget build(BuildContext context) {
-    final visibleSongs = filteredSongs;
-
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0B0F),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B0B0F),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Local Music',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            onPressed: loading ? null : loadSongs,
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Refresh songs',
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Search songs or artists...',
-                  hintStyle: const TextStyle(
-                    color: Colors.white54,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search_rounded,
-                    color: Colors.white70,
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFF19191F),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${visibleSongs.length} songs',
-                  style: const TextStyle(
-                    color: Colors.white60,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: _buildSongList(visibleSongs),
-            ),
-
-            if (currentTitle != null)
-              _buildMiniPlayer(),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFF101018),
+      appBar: AppBar(backgroundColor: const Color(0xFF101018), foregroundColor: Colors.white,
+        title: const Text('Local Music', style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [IconButton(tooltip: 'Favorites', onPressed: () { setState(() => showFavoritesOnly = !showFavoritesOnly); _applyFilter(_searchController.text); }, icon: Icon(showFavoritesOnly ? Icons.favorite : Icons.favorite_border, color: showFavoritesOnly ? Colors.pinkAccent : Colors.white)), IconButton(tooltip: 'Refresh', onPressed: loadSongs, icon: const Icon(Icons.refresh_rounded))]),
+      body: Column(children: [
+        Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: TextField(
+          controller: _searchController, onChanged: _applyFilter, style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(hintText: 'Search songs, artists, albums...', hintStyle: const TextStyle(color: Colors.white54), prefixIcon: const Icon(Icons.search, color: Colors.white54),
+            suffixIcon: _searchController.text.isNotEmpty ? IconButton(onPressed: () { _searchController.clear(); _applyFilter(''); }, icon: const Icon(Icons.close, color: Colors.white54)) : null,
+            filled: true, fillColor: const Color(0xFF20202C), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
+        )),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 18), child: Row(children: [const Icon(Icons.library_music, color: Color(0xFF00E5FF), size: 20), const SizedBox(width: 8), Text('${filteredSongs.length} songs', style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)), const Spacer(), Text('${favorites.length} favorites', style: const TextStyle(color: Colors.pinkAccent, fontSize: 12))])),
+        const SizedBox(height: 8),
+        Expanded(child: loading ? const Center(child: CircularProgressIndicator(color: Color(0xFF00E5FF))) : errorMessage != null
+          ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.error_outline, color: Colors.redAccent, size: 44), const SizedBox(height: 12), Text(errorMessage!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)), const SizedBox(height: 12), ElevatedButton(onPressed: loadSongs, child: const Text('Try Again'))])))
+          : filteredSongs.isEmpty ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.music_off_rounded, color: Colors.white38, size: 64), const SizedBox(height: 12), Text(showFavoritesOnly ? 'No favorites yet' : 'No songs found', style: const TextStyle(color: Colors.white70, fontSize: 16)), const SizedBox(height: 8), TextButton.icon(onPressed: showFavoritesOnly ? () { setState(() => showFavoritesOnly = false); _applyFilter(_searchController.text); } : loadSongs, icon: const Icon(Icons.refresh), label: Text(showFavoritesOnly ? 'Show all songs' : 'Refresh'))]))
+          : ListView.builder(padding: const EdgeInsets.only(bottom: 8), itemCount: filteredSongs.length, itemBuilder: (context, index) {
+            final song = filteredSongs[index]; final actualIndex = songs.indexOf(song); final isCurrent = actualIndex == currentIndex;
+            final ms = int.tryParse(song['duration']?.toString() ?? '') ?? 0;
+            return ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), leading: _artwork(),
+              title: Text((song['title'] ?? 'Unknown Song').toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isCurrent ? const Color(0xFF00E5FF) : Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text('${song['artist'] ?? 'Unknown Artist'} • ${formatDuration(Duration(milliseconds: ms))}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              trailing: Icon(favorites.contains(_songId(song)) ? Icons.favorite : (isCurrent && isPlaying ? Icons.equalizer : Icons.play_circle_outline), color: favorites.contains(_songId(song)) ? Colors.pinkAccent : (isCurrent ? const Color(0xFF00E5FF) : Colors.white54)),
+              onTap: () => playSong(actualIndex));
+          })),
+        _playerPanel(),
+      ]),
     );
   }
 
-  // ==========================================
-  // SONG LIST
-  // ==========================================
-
-  Widget _buildSongList(List<Map<String, dynamic>> visibleSongs) {
-    if (loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 56,
-                color: Colors.orangeAccent,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white70),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: loadSongs,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (visibleSongs.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.music_off_rounded,
-                size: 64,
-                color: Colors.white38,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'No songs found',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Make sure music access is allowed and your songs appear in the phone media library.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white54),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      itemCount: visibleSongs.length,
-      itemBuilder: (context, index) {
-        final song = visibleSongs[index];
-
-        final originalIndex = songs.indexOf(song);
-
-        final title =
-            song['title']?.toString() ?? 'Unknown Song';
-
-        final artist =
-            song['artist']?.toString() ?? 'Unknown Artist';
-
-        final selected = currentIndex == originalIndex;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF292231)
-                : const Color(0xFF141419),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFF393044),
-              child: Icon(
-                Icons.music_note_rounded,
-                color: Colors.white,
-              ),
-            ),
-            title: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(
-              artist,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white54),
-            ),
-            trailing: IconButton(
-              onPressed: () => playSong(originalIndex),
-              icon: Icon(
-                selected && isPlaying
-                    ? Icons.graphic_eq_rounded
-                    : Icons.play_circle_fill_rounded,
-                color: Colors.white,
-                size: 34,
-              ),
-            ),
-            onTap: () => playSong(originalIndex),
-          ),
-        );
-      },
-    );
-  }
-
-  // ==========================================
-  // MINI PLAYER
-  // ==========================================
-
-  Widget _buildMiniPlayer() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF201B27),
-        border: Border(
-          top: BorderSide(color: Colors.white12),
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.music_note_rounded,
-            color: Colors.white,
-            size: 30,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              currentTitle ?? 'Playing music',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: playPrevious,
-            icon: const Icon(
-              Icons.skip_previous_rounded,
-              color: Colors.white,
-            ),
-          ),
-          IconButton(
-            onPressed: togglePlayback,
-            icon: Icon(
-              isPlaying
-                  ? Icons.pause_circle_filled_rounded
-                  : Icons.play_circle_fill_rounded,
-              color: Colors.white,
-              size: 34,
-            ),
-          ),
-          IconButton(
-            onPressed: playNext,
-            icon: const Icon(
-              Icons.skip_next_rounded,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _positionSubscription?.cancel(); _durationSubscription?.cancel(); _playerStateSubscription?.cancel();
+    _searchController.dispose(); _player.dispose(); super.dispose();
   }
 }
