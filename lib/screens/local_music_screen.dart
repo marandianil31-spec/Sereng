@@ -65,7 +65,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     });
   }
 
-  String songId(Map<String, dynamic> song) {
+  String _songId(Map<String, dynamic> song) {
     return song['id']?.toString() ??
         song['uri']?.toString() ??
         song['title']?.toString() ??
@@ -93,7 +93,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
   }
 
   Future<void> toggleFavorite(Map<String, dynamic> song) async {
-    final id = songId(song);
+    final id = _songId(song);
 
     setState(() {
       if (favorites.contains(id)) {
@@ -109,17 +109,20 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
   }
 
   Future<void> loadSongs() async {
-    setState(() {
-      loading = true;
-    });
+    if (mounted) {
+      setState(() => loading = true);
+    }
 
     try {
       final result =
           await _channel.invokeListMethod<dynamic>('getSongs');
 
-      final loaded = (result ?? [])
-          .map((item => Map<String, dynamic>.from(item as Map)))
-          .toList();
+      final List<Map<String, dynamic>> loaded =
+          (result ?? <dynamic>[])
+              .map<Map<String, dynamic>>(
+                (item) => Map<String, dynamic>.from(item as Map),
+              )
+              .toList();
 
       if (!mounted) return;
 
@@ -133,12 +136,8 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
 
       setState(() => loading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Songs load nahi hue. Music permission check karein.',
-          ),
-        ),
+      _showMessage(
+        'Songs load nahi hue. Music permission check karein.',
       );
     }
   }
@@ -156,7 +155,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
           album.contains(q);
 
       final matchesFavorite =
-          !showFavoritesOnly || favorites.contains(songId(song));
+          !showFavoritesOnly || favorites.contains(_songId(song));
 
       return matchesSearch && matchesFavorite;
     }).toList();
@@ -198,8 +197,9 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
 
   Future<void> togglePlayback() async {
     if (currentIndex == -1) {
-      if (songs.isNotEmpty) {
-        await playSong(songs.indexOf(filteredSongs.first));
+      if (filteredSongs.isNotEmpty) {
+        final index = songs.indexOf(filteredSongs.first);
+        if (index >= 0) await playSong(index);
       }
       return;
     }
@@ -217,9 +217,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     if (shuffleEnabled && songs.length > 1) {
       final choices = List<int>.generate(songs.length, (i) => i)
         ..remove(currentIndex);
-
       choices.shuffle();
-
       await playSong(choices.first);
       return;
     }
@@ -248,7 +246,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     }
   }
 
-  String formatTime(Duration value) {
+  String _formatTime(Duration value) {
     final hours = value.inHours;
     final minutes = value.inMinutes.remainder(60);
     final seconds = value.inSeconds.remainder(60);
@@ -275,10 +273,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF673AB7),
-            Color(0xFF00BCD4),
-          ],
+          colors: [Color(0xFF673AB7), Color(0xFF00BCD4)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -343,7 +338,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
               IconButton(
                 onPressed: () => toggleFavorite(song),
                 icon: Icon(
-                  favorites.contains(songId(song))
+                  favorites.contains(_songId(song))
                       ? Icons.favorite
                       : Icons.favorite_border,
                   color: Colors.pinkAccent,
@@ -372,14 +367,14 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                formatTime(position),
+                _formatTime(position),
                 style: const TextStyle(
                   color: Colors.white60,
                   fontSize: 11,
                 ),
               ),
               Text(
-                formatTime(duration),
+                _formatTime(duration),
                 style: const TextStyle(
                   color: Colors.white60,
                   fontSize: 11,
@@ -477,7 +472,9 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
               });
             },
             icon: Icon(
-              showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              showFavoritesOnly
+                  ? Icons.favorite
+                  : Icons.favorite_border,
               color: showFavoritesOnly
                   ? Colors.pinkAccent
                   : Colors.white,
@@ -598,7 +595,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                           final actualIndex = songs.indexOf(song);
                           final isCurrent = actualIndex == currentIndex;
                           final isFavorite =
-                              favorites.contains(songId(song));
+                              favorites.contains(_songId(song));
 
                           final milliseconds = int.tryParse(
                                 song['duration']?.toString() ?? '',
@@ -623,7 +620,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                               ),
                             ),
                             subtitle: Text(
-                              '${song['artist'] ?? 'Unknown Artist'} • ${formatTime(Duration(milliseconds: milliseconds))}',
+                              '${song['artist'] ?? 'Unknown Artist'} • ${_formatTime(Duration(milliseconds: milliseconds))}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -657,6 +654,6 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
   void dispose() {
     _searchController.dispose();
     _player.dispose();
-    super.dispose();
+     super.dispose();
   }
 }
